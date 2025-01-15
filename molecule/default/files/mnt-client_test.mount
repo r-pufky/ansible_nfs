@@ -1,0 +1,12 @@
+[Unit]
+Description=NFS mount 127.0.0.1:/home/vagrant
+
+[Mount]
+What=127.0.0.1:/home/vagrant
+Where=/mnt/client_test
+Type=nfs
+Options=nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail
+TimeoutSec=30
+
+[Install]
+WantedBy=multi-user.target

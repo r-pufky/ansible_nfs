@@ -1,0 +1,131 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# NFS 4.2 Role Configuration
+###############################################################################
+# NFS V2 is not supported in bookworm. Explicitly disable V3 by default.
+#
+# Default configuration supports NFSv4.2.
+
+# Configure NFS server? Default: false.
+nfs_server: false
+
+# Configure NFS client? Default: false.
+nfs_client: false
+
+# Enable legacy services?
+#
+# NFS V4+ does not require rpcbind, rpc-statd, rpc-statd-notify services; these
+# are disabled by default. Enable if needed by services other than NFS.
+#
+# Default: False.
+nfs_legacy_services_enable: false
+
+###############################################################################
+# NFS Exports (server)
+###############################################################################
+# Traditional NFS Server Exports. Follow formats from exports (man exports).
+#
+# ZFS filesystems should export directly from ZFS which will automatically use
+# the configured NFS server.
+#
+# nfs_exports:
+#     list of dict - NFS exported shares.
+#   - source: str - source directory to share
+#     hosts:
+#         list of dict - host options
+#       - host: str - host machine
+#             Special Case:
+#               *?: * and ? may be used for wildcard matching hostnames
+#
+#             Values:
+#                  {FQDN}: fully qualified domain names
+#                  {HOST}: partial domain name that can be resolved
+#                  {CIDR}: IPv4/IPv6 CIDR notation; do not use square brackets
+#                  {IPv4}: IPv4
+#                  {IPv6}: do not use square brackets
+#                @{GROUP}: NIS netgroup; only host portion is considered, empty
+#                          hosts or hosts with - are ignored.
+#         options: list of str - exports options
+#
+# nfs_exports:
+#   - source: '/data/pictures'
+#     hosts:
+#       - host: '10.2.2.80'
+#         options:
+#           - 'rw'
+#           - 'sync'
+#           - 'fsid=1'
+#           - 'all_squash'
+#           - 'no_subtree_check'
+#           - 'anonuid=5555'
+#           - 'anongid=5555'
+#       - host: '10.4.4.0/24'
+#         options:
+#           - 'rw'
+#           - 'sync'
+#           - 'fsid=1'
+#           - 'all_squash'
+#           - 'no_subtree_check'
+#           - 'anonuid=5555'
+#           - 'anongid=5555'
+#
+# Reference:
+# * https://linux.die.net/man/5/exports
+# * https://unix.stackexchange.com/questions/763248/is-fsid-really-needed-for-nfs-export
+nfs_exports: []
+
+###############################################################################
+# NFS Mounts (client)
+###############################################################################
+
+# Use systemd automounts instead of /etc/fstab?
+#
+# Creates mount, automount units for each mounted share; mounted on demand
+# instead of being mounted via fstab. Units are created using the mount path
+# as the name, replacing / with -.
+#
+# Only use fstab mounts if the NFS shares will be available on boot or use
+# 'noauto' and 'nofail' options.
+#
+# Default: True.
+nfs_systemd_automount_enable: true
+
+# NFS shares to mount.
+#
+# nfs_mounts:
+#     list of dict - client NFS mounts.
+#   - server: str - NFS server
+#     export: str - NFS export path
+#     state: str - NFS mount state
+#         Values:
+#           present: create NFS mount, do not trigger immediate mount
+#           mounted: create NFS mount, trigger immediate mount (treated as
+#                    present if nfs_systemd_automount_enable).
+#            absent: unmount and remove NFS mount
+#     mount: str - client full path mount location
+#     options: list of str - options for NFS mounting
+#         Default: ['nfsvers=4','minorversion=2','proto=tcp','fsc']
+#     timeout: int - mount timeout in seconds
+#         Default: 30.
+#
+# nfs_mounts:
+#   - server: 'example.com'
+#     export: '/data/pictures'
+#     mount: '/data/pictures'
+#     state: 'present'
+#     options:
+#       - 'nfsvers=4'
+#       - 'minorversion=2'
+#       - 'proto=tcp'
+#       - 'fsc'
+#       - 'noauto'
+#       - 'nofail'
+#     timeout: 30
+#
+# Default: [].
+#
+# Reference:
+# * https://wiki.archlinux.org/title/NFS
+# * https://manpages.debian.org/testing/mount/mount.8.en.html
+nfs_mounts: []

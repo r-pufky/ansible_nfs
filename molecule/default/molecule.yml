@@ -1,0 +1,90 @@
+---
+# NFS server uses kernel modules. Test defaults, exports, and services are
+# running.
+dependency:
+  name: 'galaxy'
+driver:
+  name: 'vagrant'
+  provider:
+    name: 'virtualbox'
+    config_options:
+      ssh.keep_alive: true
+      ssh.remote_user: 'root'
+    options:
+      append_platform_to_hostname: false
+provisioner:
+  name: 'ansible'
+  config_options:
+    defaults:
+      interpreter_python: 'auto_silent'  # suppress warnings
+      callback_whitelist: 'profile_tasks, timer, yaml'  # output profiling info
+  inventory:
+    group_vars:
+      all:
+        nfs_server: true
+        nfs_client: true
+        nfs_exports:
+          - source: '/home/vagrant'
+            hosts:
+              - host: '127.0.0.1'
+                options:
+                  - 'rw'
+                  - 'sync'
+                  - 'fsid=1'
+                  - 'all_squash'
+                  - 'no_subtree_check'
+                  - 'anonuid=1000'
+                  - 'anongid=1000'
+        nfs_mounts:
+          - server: '127.0.0.1'
+            export: '/home/vagrant'
+            mount: '/mnt/client_test'
+            state: 'present'
+            options:
+              - 'nfsvers=4'
+              - 'minorversion=2'
+              - 'proto=tcp'
+              - 'fsc'
+              - 'noauto'
+              - 'nofail'
+            timeout: 30
+    host_vars:
+      nfs-debian-12-vm-default-fstab:
+        nfs_systemd_automount_enable: false
+platforms:
+  - name: 'nfs-debian-12-vm-default'
+    box: 'debian/bookworm64'
+    memory: 4096
+    cpus: 2
+    interfaces:
+      - network_name: private_network  # network_name required
+        auto_config: true
+        type: 'dhcp'
+  - name: 'nfs-debian-12-vm-default-fstab'
+    box: 'debian/bookworm64'
+    memory: 4096
+    cpus: 2
+    interfaces:
+      - network_name: private_network  # network_name required
+        auto_config: true
+        type: 'dhcp'
+verifier:
+  name: 'ansible'
+lint: |
+  set -e
+  yamllint .
+  ansible-lint .
+scenario:
+  test_sequence:
+    # - 'dependency'
+    # - 'cleanup'
+    - 'destroy'
+    - 'syntax'
+    - 'create'
+    # - 'prepare'
+    - 'converge'
+    # - 'idempotence'  # services toggled
+    # - 'side_effect'
+    - 'verify'
+    # - 'cleanup'
+    - 'destroy'

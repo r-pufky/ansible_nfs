@@ -1,0 +1,25 @@
+---
+- name: 'Install packages'
+  ansible.builtin.include_role:
+    name: 'r_pufky.srv.apt'
+  vars:
+    apt_packages:
+      - '{{ nfs_role_server_packages if nfs_server else [] }}'
+      - '{{ nfs_role_client_packages if nfs_client else [] }}'
+    apt_package_update_cache: true
+
+- name: 'Disable NFSv2, NFSv3'
+  ansible.builtin.include_tasks: 'disable_v2_v3.yml'
+
+- name: 'Server'
+  when: nfs_server
+  ansible.builtin.include_tasks: 'server.yml'
+
+- name: 'Client'
+  when: >
+    nfs_client and
+    nfs_mounts | length > 0
+  ansible.builtin.include_tasks: 'client.yml'
+  loop: '{{ nfs_mounts }}'
+  loop_control:
+    loop_var: 'mount'

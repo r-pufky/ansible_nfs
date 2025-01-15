@@ -1,0 +1,49 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# NFS Role Options
+###############################################################################
+
+# Last time debian options were validated against a default configuration.
+nfs_role_validate_date: '2024-06-25'
+nfs_role_validate_release: 'bookworm'
+
+# Default required packages for NFS server install.
+#
+# Reference:
+# * https://github.com/zilexa/Homeserver/tree/master/filesystem/networkshares_HowTo-NFSv4.2
+# * https://wiki.debian.org/NFSServerSetup
+
+nfs_role_server_packages:
+  - 'nfs-kernel-server'
+
+nfs_role_client_packages:
+  - 'nfs-common'
+
+nfs_role_default_mount_options:
+  - 'nfsvers=4'
+  - 'minorversion=2'
+  - 'proto=tcp'
+  - 'fsc'
+
+###############################################################################
+# NFS on LXC on Proxmox.
+###############################################################################
+# Apply this to bare metal machines. NFS LXC containers currently do not work
+# with proxmox 7:
+# * NFS does not support user namespaces, and therefore must be executed in
+#   privileged container or directly on the server. Proxmox already uses NFS.
+# * LXC privileged container requires features: mount=nfs,nesting=1; but
+#   currently does not boot with network support.
+# * Unprivileged containers cannot mount NFS.
+# * apparmor can be run unconfined to enable nfs rpc_pipefs support, otherwise
+#   a custom apparmor profile is required on Proxmox.
+#
+# TODO(role): re-evaluate this with bookworm and PVE 8.
+#
+# Reference:
+# * https://forum.proxmox.com/threads/lxc-aa_profile-is-deprecated-and-was-renamed-to-lxc-apparmor-profile.61332/
+# * https://forum.proxmox.com/threads/lxc-aa_profile-is-deprecated-and-was-renamed-to-lxc-apparmor-profile.38505/
+# * https://www.hungred.com/how-to/setup-nfs-server-lxc-proxmox/
+# * https://github.com/lxc/lxd/issues/2703
+# * https://forum.proxmox.com/threads/lxc-container-nfs-server.43091/

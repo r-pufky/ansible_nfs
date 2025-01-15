@@ -1,0 +1,52 @@
+---
+###############################################################################
+# Disable NFS V2, V3
+###############################################################################
+# Hard disable NFSv2, NFSv3.
+#
+# Bookworm does not support V2; V3 should not be used in lieu of V4, which
+# supports single socket, local file copies, state, authentication, encryption.
+#
+# PVE node require rpcbind services only for NFS; it is safe to disable if
+# using V4.
+#
+# Decision: disable rpc-statd for client and server - testing showed that base
+#     installs only used rpc-statd for NFS.
+#
+# Reference:
+# * https://orca.pet/nfs4debian/
+# * https://wiki.debian.org/NFSServerSetup
+# * https://forum.proxmox.com/threads/nfsv4-server-disabled-under-pve-8.129803/
+
+- name: 'Disable NFSv2, NFSv3 | disable legacy services'
+  when: not nfs_legacy_services_enable
+  ansible.builtin.systemd_service:
+    name: '{{ item }}'
+    masked: true
+    state: 'stopped'
+  loop:
+    - 'rpcbind'
+    - 'rpcbind.socket'
+    - 'rpc-statd'
+    - 'rpc-statd-notify'
+
+- name: 'Disable NFSv2, NFSv3 | disable support'
+  ansible.builtin.include_role:
+    name: 'r_pufky.srv.systemd'
+  vars:
+    systemd_services:
+      # V2 not supported in bookworm; --no-nfs-version 2 will explicitly fail.
+      - name: 'nfs-server'
+        state: 'present'
+        override: true
+        service:
+          exec_start:
+            - ''
+            - '/usr/sbin/rpc.nfsd --no-nfs-version 3'
+      - name: 'nfs-mountd'
+        state: 'present'
+        override: true
+        service:
+          exec_start:
+            - ''
+            - '/usr/sbin/rpc.mountd --no-nfs-version 2 --no-nfs-version 3'

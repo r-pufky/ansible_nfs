@@ -1,0 +1,119 @@
+#
+# This is a general configuration for the
+# NFS daemons and tools
+#
+[general]
+pipefs-directory={{ nfs_conf_general_pipefs_directory | default('/run/rpc_pipefs')}}
+
+[nfsrahead]
+nfs={{ nfs_conf_nfsrahead_nfs | default('15000') }}
+nfs4={{ nfs_conf_nfsrahead_nfsv4 | default('16000') }}
+default={{ nfs_conf_nfsrahead_default | default('128') }}
+
+[exports]
+rootdir={{ nfs_conf_exports_rootdir | default('/export') }}
+
+[exportfs]
+# debug={{ nfs_conf_exportfs_debug | default(0) | int }}
+
+[gssd]
+verbosity={{ nfs_conf_gssd_verbosity | default(0) }}
+rpc-verbosity={{ nfs_conf_gssd_rpc_verbosity | default(0) }}
+use-memcache={{ nfs_conf_gssd_use_memcache | default(0) | int }}
+use-machine-creds={{ nfs_conf_gssd_use_machine_creds | default(1) | int }}
+use-gss-proxy={{ nfs_conf_gssd_use_gss_proxy | default(0) | int }}
+avoid-dns={{ nfs_conf_gssd_avoid_dns | default(1) | int }}
+limit-to-legacy-enctypes={{ nfs_conf_gssd_limit_to_legacy_enctypes | default(0) | int }}
+context-timeout={{ nfs_conf_gssd_context_timeout | default(0) | int }}
+rpc-timeout={{ nfs_conf_gssd_rpc_timeout | default(5) | int }}
+keytab-file={{ nfs_conf_gssd_keytab_file | default('tc/krb5.keytab') }}
+cred-cache-directory={{ nfs_conf_gssd_cred_cache_directory | default([]) | join(':') }}
+preferred-realm={{ nfs_conf_gssd_preferred_realm | default('') }}
+set-home={{ nfs_conf_gssd_set_home | default(1) | int }}
+upcall-timeout={{ nfs_conf_gssd_upcall_timeout | default(30) }}
+cancel-timed-out-upcalls={{ nfs_conf_gssd_cancel_timed_out_upcalls | default(0) }}
+
+[lockd]
+port={{ nfs_conf_lockd_port | default(0) }}
+udp-port={{ nfs_conf_lockd_udp_port | default(0) }}
+
+[exportd]
+{% if nfs_conf_exportd_debug %}
+debug={{ nfs_conf_exportd_debug }}
+{% endif %}
+manage-gids={{ 'y' if nfs_conf_exportd_manage_gids else 'n' }}
+state-directory-path={{ nfs_conf_exportd_state_directory_path | default('/var/lib/nfs') }}
+threads={{ nfs_conf_exportd_threads | default(1) }}
+cache-use-ipaddr={{ 'y' if nfs_conf_exportd_cache_use_ipaddr else 'n' }}
+ttl={{ nfs_conf_exportd_ttl | default(1800) }}
+
+[mountd]
+{% if nfs_conf_mountd_debug %}
+debug={{ nfs_conf_mountd_debug }}
+{% endif %}
+manage-gids={{ 'y' if nfs_conf_mountd_manage_gids else 'n' }}
+descriptors={{ nfs_conf_mountd_descriptors | default(0) }}
+port={{ nfs_conf_mountd_port | default(0) }}
+threads={{ nfs_conf_mountd_threads | default(1) }}
+reverse-lookup={{ 'y' if nfs_conf_mountd_reverse_lookup else 'n' }}
+state-directory-path={{ nfs_conf_mountd_state_directory_path | default('/var/lib/nfs') }}
+ha-callout={{ nfs_conf_mountd_ha_callout | default('') }}
+cache-use-ipaddr={{ 'y' if nfs_conf_mountd_cache_use_ipaddr else 'n' }}
+ttl={{ nfs_conf_mountd_ttl | default(1800) }}
+
+[nfsdcld]
+debug={{ nfs_conf_nfsdcld_debug | default(0) }}
+storagedir={{ nfs_conf_nfsdcld_storagedir | default('/var/lib/nfs/nfsdcld') }}
+
+[nfsdcltrack]
+debug={{ nfs_conf_nfsdcltrack_debug | default(0) }}
+storagedir={{ nfs_conf_nfsdcld_storagedir | default('/var/lib/nfs/nfsdcltrack') }}
+
+[nfsd]
+# debug={{ nfs_conf_nfsd_debug | default(0) | int }}
+threads={{ nfs_conf_nfsd_threads | default(8) }}
+host={{ nfs_conf_nfsd_host | default([]) | join(',') }}
+port={{ nfs_conf_nfsd_port | default(2049) }}
+grace-time={{ nfs_conf_nfsd_grace_time | default(90) }}
+lease-time={{ nfs_conf_nfsd_lease_time | default(90) }}
+udp={{ 'y' if nfs_conf_nfsd_udp else 'n' }}
+tcp={{ 'y' if nfs_conf_nfsd_tcp else 'n' }}
+vers3={{ 'y' if nfs_conf_nfsd_vers3 else 'n' }}
+vers4={{ 'y' if nfs_conf_nfsd_vers4 else 'n' }}
+vers4.0={{ 'y' if nfs_conf_nfsd_vers40 else 'n' }}
+vers4.1={{ 'y' if nfs_conf_nfsd_vers41 else 'n' }}
+vers4.2={{ 'y' if nfs_conf_nfsd_vers42 else 'n' }}
+{#
+only enabled on y; rdma=n causes service failure:
+
+  rpc.nfsd[9677]: rpc.nfsd: unable to interpret port name n
+#}
+{% if nfs_conf_nfsd_rdma %}
+rdma=y
+{% endif %}
+rdma-port={{ nfs_conf_nfsd_rdma_port | default(20049) }}
+
+[statd]
+debug={{ nfs_conf_statd_debug | default(0) | int }}
+port={{ nfs_conf_statd_port | default(0) | int }}
+outgoing-port={{ nfs_conf_statd_outgoing_port | default(0) | int }}
+name={{ nfs_conf_statd_name | default('') }}
+state-directory-path={{ nfs_conf_statd_state_directory_path | default('/var/lib/nfs/statd') }}
+ha-callout={{ nfs_conf_statd_ha_callout | default('') }}
+no-notify={{ nfs_conf_statd_no_notify | default(0) | int }}
+
+[sm-notify]
+debug={{ nfs_conf_sm_notify_debug | default(0) }}
+force={{ nfs_conf_sm_notify_force | default(0) }}
+retry-time={{ nfs_conf_sm_notify_retry_time | default(900) }}
+outgoing-port={{ nfs_conf_sm_notify_outgoing_port | default(0) }}
+outgoing-addr={{ nfs_conf_sm_notify_outgoing_addr | default('') }}
+lift-grace={{ 'y' if nfs_conf_sm_notify_lift_grace else 'n' }}
+
+[svcgssd]
+principal={{ nfs_conf_svcgssd_principal | default('') }}
+{#
+empty line is required to prevent config load errors:
+
+  conf_parse: last line non-terminated, ignored.
+#}

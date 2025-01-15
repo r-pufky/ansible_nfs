@@ -1,0 +1,8 @@
+[Unit]
+Description=Automount NFS 127.0.0.1:/home/vagrant
+
+[Automount]
+Where=/mnt/client_test
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,114 @@
+---
+# yamllint disable rule:line-length
+- name: 'Default | verify | nfs server'
+  hosts: 'all'
+  gather_facts: false
+  become: true
+  tasks:
+    - name: 'Default | verify | nfs server | query services'
+      ansible.builtin.service_facts:
+
+    - name: 'Default | verify | nfs server | query /etc/nfs.conf.d/local.conf'
+      ansible.builtin.copy:
+        src: 'local.conf'
+        dest: '/etc/nfs.conf.d/local.conf'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+      check_mode: true
+      diff: true
+      register: _test_nfs_conf
+
+    - name: 'Default | verify | nfs server | assert expected /etc/resolv.conf'
+      ansible.builtin.assert:
+        that:
+          - not _test_nfs_conf.changed
+        fail_msg: |
+          /etc/nfs.conf.d/local.conf is not in expected format.
+
+          {{ _test_nfs_conf.diff }}
+
+    - name: 'Default | verify | nfs server | assert nfs services enabled'
+      ansible.builtin.assert:
+        that:
+          - '"nfs-server.service" in ansible_facts.services'
+          - '"nfs-mountd.service" in ansible_facts.services'
+          - '"nfs-client.target in ansible_facts.services"'
+        fail_msg: 'nfs-server.service, nfs-mountd.service should be exist.'
+
+- name: 'Default | verify | nfs client'
+  hosts: 'nfs-debian-12-vm-default'
+  gather_facts: false
+  become: true
+  tasks:
+    # Test client use of r_pufky.srv.systemd wrapper has no runtime / logic
+    # errors. Files rendered are assumed correct as it is tested in systemd.
+    - name: 'Default | verify | nfs client | query mnt-client_test.automount'
+      ansible.builtin.copy:
+        src: 'mnt-client_test.automount'
+        dest: '/etc/systemd/system/mnt-client_test.automount'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+      check_mode: true
+      diff: true
+      register: _test_nfs_auto
+
+    - name: 'Default | verify | nfs client | assert expected mnt-client_test.automount'
+      ansible.builtin.assert:
+        that:
+          - not _test_nfs_auto.changed
+        fail_msg: |
+          /etc/systemd/system/mnt-client_test.automount is not in expected
+          format.
+
+          {{ _test_nfs_auto.diff }}
+
+    - name: 'Default | verify | nfs client | query mnt-client_test.mount'
+      ansible.builtin.copy:
+        src: 'mnt-client_test.mount'
+        dest: '/etc/systemd/system/mnt-client_test.mount'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+      check_mode: true
+      diff: true
+      register: _test_nfs_mount
+
+    - name: 'Default | verify | nfs client | assert expected mnt-client_test.mount'
+      ansible.builtin.assert:
+        that:
+          - not _test_nfs_mount.changed
+        fail_msg: |
+          /etc/systemd/system/mnt-client_test.mount is not in expected format.
+
+          {{ _test_nfs_auto.diff }}
+
+    - name: 'Default | verify | nfs client | assert nfs services enabled'
+      ansible.builtin.assert:
+        that:
+          - '"nfs-client.target in ansible_facts.services"'
+        fail_msg: 'nfs-client.target should be exist.'
+
+- name: 'Default | verify | nfs client'
+  hosts: 'nfs-debian-12-vm-default-fstab'
+  gather_facts: false
+  become: true
+  tasks:
+    - name: 'Default | verify | nfs client | query /etc/fstab'
+      ansible.builtin.slurp:
+        path: '/etc/fstab'
+      register: _test_nfs_client
+
+    - name: 'Default | verify | nfs client | parse /etc/fstab'
+      ansible.builtin.set_fact:
+        _test_nfs_fstab: '{{ _test_nfs_client.content | b64decode }}'
+
+    - name: 'Default | verify | nfs client | assert fstab nfs mount'
+      ansible.builtin.assert:
+        that:
+          - '"127.0.0.1:/home/vagrant /mnt/client_test nfs nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail 0 0" in _test_nfs_fstab'
+        fail_msg: |
+          /etc/fstab should contain
+
+            127.0.0.1:/home/vagrant /mnt/client_test nfs nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail 0 0

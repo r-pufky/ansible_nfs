@@ -1,0 +1,539 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# NFS General Configuration (/etc/nfs.conf.d/local.conf)
+###############################################################################
+# NFS general configuration settings. For most users, there will be no need to
+# modify these options. NFSv2, NFSv3 specific options will have **no effect**
+# as those versions are hard disabled.
+#
+# Reference:
+# * https://www.man7.org/linux/man-pages/man5/nfs.conf.5.html
+
+nfs_conf_general_pipefs_directory: '/run/rpc_pipefs'
+
+###############################################################################
+# nfsrahead (NFS readahead for mounts)
+###############################################################################
+# Reference:
+# * https://www.man7.org/linux/man-pages/man5/nfsrahead.5.html
+
+# NFS mount readahead for NFSv3 (KB). Default: 15000.
+nfs_conf_nfsrahead_nfs: 15000
+
+# NFS mount readahead for NFSv4 (KB). Default: 16000.
+nfs_conf_nfsrahead_nfsv4: 16000
+
+# NFS mount readahead default (KB). Default: 128.
+nfs_conf_nfsrahead_default: 128
+
+# Prefix path to all exported entries.
+#
+# NFSv4 requires a single root file handle to enable benefits of local file
+# operations for shared directories. For kernels 2.6.33+ this root file handle
+# is automatically created and this can be safely ignored. This is a majority
+# of cases.
+#
+# If required, create the export directory outside of this role and link any
+# exported directories in it. Exported filesystems will appear to clients as
+# from root ({SEVER}:/{EXPORT}); on the server it will map to
+# nfs_conf_exports_rootdir/{EXPORT}.
+#
+# nfs_conf_exports_rootdir: '/export'
+#
+# server /etc/exports:
+#   /data *(rw,anonuid=1000,anongid=1000)
+#
+# server filesystem:
+#   /export/data
+#
+# client /etc/fstab:
+#   {SERVER}:/data /autofs/remote_data nfs4 rw,nfsvers=4,minorversion=2,proto=tcp,fsc,nocto,_netdev 0 0
+#
+# Default: ''.
+#
+# Reference:
+# * https://serverfault.com/questions/1143373/nfsv4-fsid-option-and-the-purpose-of-export-roots
+nfs_conf_exports_rootdir: ''
+
+# Enable exportfs debugging.
+#
+# TODO(role): noop until debug patch fix lands.
+#     Reference: https://patchwork.kernel.org/project/linux-nfs/patch/20221004174015.1362841-1-sorenson@redhat.com/
+#
+# Default: False.
+nfs_conf_exportfs_debug: false
+
+###############################################################################
+# gssd
+###############################################################################
+# Reference:
+# * https://www.man7.org/linux/man-pages/man8/rpc.gssd.8.html
+
+# Verbosity, equivalent to number of -v. Default: 0.
+nfs_conf_gssd_verbosity: 0
+
+# RPC verbosity, equivalent to number of -v. Default: 0.
+nfs_conf_gssd_rpc_verbosity: 0
+
+# Use memcache. Default: False.
+nfs_conf_gssd_use_memcache: false
+
+# Use local system machine credentials. Default: True.
+nfs_conf_gssd_use_machine_creds: true
+
+# Enable GSSAPI proxy requests. Default: False.
+nfs_conf_gssd_use_gss_proxy: false
+
+# Avoid reverse DNS lookups.
+#
+# DNS lookups are required if partially qualified, or non canonical names are
+# regularly used.
+#
+# Disabling will cause reverse DNS lookup to always be used, even if the server
+# name looks like a canonical name; this may introduce a security
+# vulnerability.
+#
+# Default: True.
+nfs_conf_gssd_avoid_dns: true
+
+# Restrict sessions to weak encryption types. Default: False.
+nfs_conf_gssd_limit_to_legacy_enctypes: false
+
+# Kernel GSS context timeout (seconds).
+#
+# Allows forcing new kernel contexts to be negotiated after timeout seconds,
+# which allows changing Kerberos tickets and identities frequently. Default is
+# no explicit timeout, which means the kernel context will live the lifetime of
+# the Kerberos service ticket used in its creation.
+#
+# Default: 0 (no timeout).
+nfs_conf_gssd_context_timeout: 0
+
+# RPC connection timeout (seconds).
+#
+# If you get messages like "WARNING: can't create tcp rpc_clnt to server
+# %servername% for user with uid %uid%: RPC: Remote system error - Connection
+# timed out", you should consider an increase of this timeout.
+#
+# Default: 5.
+nfs_conf_gssd_rpc_timeout: 5
+
+# Use keytab file to obtain machine credentials. Default: '/etc/krb5.keytab'.
+nfs_conf_gssd_keytab_file: '/etc/krb5.keytab'
+
+# List of search directories for credential files.
+#
+# Special Case:
+#   %U: UID of the user for whom credentials are being searched.
+#
+# Default: [].
+nfs_conf_gssd_cred_cache_directory: []
+
+# Kerberos realm preferred when scanning available credentials. Default: ''.
+nfs_conf_gssd_preferred_realm: ''
+
+# Use $HOME instead of / for k5identity files.
+#
+# Use a principal based on host and/or service parameters listed in
+# $HOME/.k5identity; instead of first match found in
+# /var/kerberos/krb5/user/$EUID/client.keytab.
+#
+# Default: True.
+nfs_conf_gssd_set_home: true
+
+# Upcall thread timeout (seconds).
+#
+# Special Case:
+#     5: minimum timeout
+#   600: maximum timeout
+#
+# Default: 30.
+nfs_conf_gssd_upcall_timeout: 30
+
+# Report -ETIMEDOUT to kernel for upcall thread timeouts. Default: False.
+nfs_conf_gssd_cancel_timed_out_upcalls: false
+
+###############################################################################
+# lockd
+###############################################################################
+# Reference:
+# * https://www.man7.org/linux/man-pages/man8/rpc.statd.8.html
+
+# lockd NLM request port. Default: 0 (disabled).
+nfs_conf_lockd_port: 0
+
+# lockd NLM UDP request port. Default: 0 (disabled).
+nfs_conf_lockd_udp_port: 0
+
+###############################################################################
+# exportd
+###############################################################################
+# Reference:
+# * https://www.man7.org/linux/man-pages/man8/exportd.8.html
+
+# Enable debugging.
+#
+# Values:
+#       all: all debug messages
+#      auth: authentication messages
+#      call: call messages
+#   general: general messages
+#     parse: file parsing messages
+#
+# Default: '' (disabled).
+nfs_conf_exportd_debug: ''
+
+# Map UIDs to GIDs.
+#
+# Accept requests from the kernel to map user id numbers into lists of group id
+# numbers for use in access control. An NFS request will normally (except when
+# using Kerberos or other cryptographic authentication) contain a user-id and a
+# list of group-ids. Due to a limitation in the NFS protocol, at most 16 groups
+# ids can be listed. If used the list of group ids received from the client
+# will be replaced by a list of group ids determined by an appropriate lookup
+# on the server. Note that the 'primary' group id is not affected so a newgroup
+# command on the client will still be effective.
+#
+# Default: True.
+nfs_conf_exportd_manage_gids: true
+
+# NFS exportd state directory. Default: '/var/lib/nfs'.
+nfs_conf_exportd_state_directory_path: '/var/lib/nfs'
+
+# NFS worker threads nfsv4.exports can spawn.
+#
+# More threads are usually only needed for NFS servers which need to handle
+# mount storms of hundreds of NFS mounts in a few seconds, or when your DNS
+# server is slow or unreliable.
+#
+# Default: 1.
+nfs_conf_exportd_threads: 1
+
+# Use only IP for caching.
+#
+# Normally each client IP address is matched against each host identifier
+# (name, wildcard, netgroup etc) found in /etc/exports and a combined identity
+# is formed from all matching identifiers. Often many clients will map to the
+# same combined identity so performing this mapping reduces the number of
+# distinct access details that the kernel needs to store. Using this option
+# suppresses this mapping so that access to each filesystem is requested and
+# cached separately for each client IP address. Doing this can increase the
+# burden of updating the cache slightly, but can make the log messages easier
+# to read.
+#
+# Default: False.
+nfs_conf_exportd_cache_use_ipaddr: false
+
+# Kernel cache TTL.
+#
+# Reduces the rate of cache update requests but changes to hostname to address
+# mappings can take longer to be noticed.
+#
+# Default: 1800 (30 minutes).
+nfs_conf_exportd_ttl: 1800
+
+###############################################################################
+# mountd
+###############################################################################
+# Reference:
+# * https://www.man7.org/linux/man-pages/man8/rpc.mountd.8.html
+
+# Enable debugging.
+#
+# Values:
+#       all: all debug messages
+#      auth: authentication messages
+#      call: call messages
+#   general: general messages
+#     parse: file parsing messages
+#
+# Default: '' (disabled).
+nfs_conf_mountd_debug: ''
+
+# Map UIDs to GIDs.
+#
+# Accept requests from the kernel to map user id numbers into lists of group id
+# numbers for use in access control. An NFS request will normally (except when
+# using Kerberos or other cryptographic authentication) contain a user-id and a
+# list of group-ids. Due to a limitation in the NFS protocol, at most 16 groups
+# ids can be listed. If used the list of group ids received from the client
+# will be replaced by a list of group ids determined by an appropriate lookup
+# on the server. Note that the 'primary' group id is not affected so a newgroup
+# command on the client will still be effective.
+#
+# Default: True.
+nfs_conf_mountd_manage_gids: true
+
+# Open file descriptors limt. Default: 0 (no limit).
+nfs_conf_mountd_descriptors: 0
+
+# Mountd RPC litener port.
+#
+# Use /etc/services if not set, otherwise chooses a random ephemeral port for
+# each listener socket. Can be used to fix the port value of rpc.mountd's
+# listeners when NFS MOUNT requests must traverse a firewall between clients
+# and servers.
+#
+# Default: 0 (/etc/services).
+nfs_conf_mountd_port: 0
+
+# NFS worker threads nfsv4.mountd can spawn.
+#
+# More threads are usually only needed for NFS servers which need to handle
+# mount storms of hundreds of NFS mounts in a few seconds, or when your DNS
+# server is slow or unreliable.
+#
+# Default: 1.
+nfs_conf_mountd_threads: 1
+
+# Perform reverse lookup for each IP address?
+#
+# rpc.mountd tracks IP addresses in the rmtab file. When a DUMP request is made
+# (by someone running showmount -a, for instance), it returns IP addresses
+# instead of hostnames by default. This option causes rpc.mountd to perform a
+# reverse lookup on each IP address and return that hostname instead. Enabling
+# this can have a substantial negative effect on performance in some
+# situations.
+#
+# Default: False.
+nfs_conf_mountd_reverse_lookup: false
+
+# NFS mountd state directory (etab, rmtab). Default: '/var/lib/nfs'.
+nfs_conf_mountd_state_directory_path: '/var/lib/nfs'
+
+# High availability callout program.
+#
+# Not needed with 2.6+ kernels. Mount nfsd on /proc/fs/nfsd instead.
+#
+# Default: '' (disabled).
+nfs_conf_mountd_ha_callout: ''
+
+# Use only IP for caching.
+#
+# Normally each client IP address is matched against each host identifier
+# (name, wildcard, netgroup etc) found in /etc/exports and a combined identity
+# is formed from all matching identifiers. Often many clients will map to the
+# same combined identity so performing this mapping reduces the number of
+# distinct access details that the kernel needs to store. Using this option
+# suppresses this mapping so that access to each filesystem is requested and
+# cached separately for each client IP address. Doing this can increase the
+# burden of updating the cache slightly, but can make the log messages easier
+# to read.
+#
+# Default: False.
+nfs_conf_mountd_cache_use_ipaddr: false
+
+# Kernel cache TTL.
+#
+# Reduces the rate of cache update requests but changes to hostname to address
+# mappings can take longer to be noticed.
+#
+# Default: 1800 (30 minutes).
+nfs_conf_mountd_ttl: 1800
+
+###############################################################################
+# nfscl (nfscld, nfscltrack)
+###############################################################################
+# Reference:
+# * https://www.man7.org/linux/man-pages/man8/nfsdcltrack.8.html
+
+# Enable client tracking daemon debugging? Default: False.
+nfs_conf_nfsdcld_debug: false
+
+# Client tracking daemon stable storage. Default: '/var/lib/nfs/nfsdcld'
+nfs_conf_nfsdcld_storagedir: '/var/lib/nfs/nfsdcld'
+
+# Enable client tracking debugging? Default: False.
+nfs_conf_nfsdcltrack_debug: false
+
+# Client tracking stable storage. Default: '/var/lib/nfs/nfsdcltrack'
+nfs_conf_nfsdcltrack_storagedir: '/var/lib/nfs/nfsdcltrack'
+
+###############################################################################
+# nfsd
+###############################################################################
+# Reference:
+# * https://www.man7.org/linux/man-pages/man8/rpc.nfsd.8.html
+
+# Enable NFSD debugging?
+#
+# TODO(role): noop until debug patch fix lands.
+#     Reference: https://patchwork.kernel.org/project/linux-nfs/patch/20221004174015.1362841-1-sorenson@redhat.com/
+#
+# Default: False.
+nfs_conf_nfsd_debug: false
+
+# Number of threads to start. Default: 8.
+nfs_conf_nfsd_threads: 8
+
+# Accept NFS requests on specified interfaces.
+#
+# Values:
+#     {IP}: IP
+#   {HOST}: hostname
+#
+# Default: [] (all).
+nfs_conf_nfsd_host: []
+
+# NFSD TCP/UDP port. Default: 2049.
+nfs_conf_nfsd_port: 2049
+
+# Grace time used for NFSv4 and NLM (seconds).
+#
+# New file open requests (NFSv4) and new file locks (NLM) will not be allowed
+# until after this time has passed to allow clients to recover state.
+#
+# Default: 90.
+nfs_conf_nfsd_grace_time: 90
+
+# NFSv4 lease (seconds).
+#
+# This corresponds to how often clients need to confirm their state with the
+# server.
+#
+# Values:
+#     10: minimum lease
+#   3600: maximum lease
+#
+# Default: 90.
+nfs_conf_nfsd_lease_time: 90
+
+# Enable UDP. Default: False.
+nfs_conf_nfsd_udp: false
+
+# Enable TCP. Default: True.
+nfs_conf_nfsd_tcp: true
+
+# Enable NFSv3 versions.
+#
+# Individual versions must still be enabled.
+#
+# Default: False.
+nfs_conf_nfsd_vers3: false
+
+# Enable NFSv4 versions.
+#
+# Individual versions must still be enabled.
+#
+# Default: True.
+nfs_conf_nfsd_vers4: true
+
+# Enable NFSv4.0 (requires nfs_conf_nfsd_vers4). Default: False.
+nfs_conf_nfsd_vers40: false
+
+# Enable NFSv4.1 (requires nfs_conf_nfsd_vers4). Default: False.
+nfs_conf_nfsd_vers41: false
+
+# Enable NFSv4.2 (requires nfs_conf_nfsd_vers4). Default: True.
+nfs_conf_nfsd_vers42: true
+
+# Enable RDMA. Default: False.
+nfs_conf_nfsd_rdma: false
+
+# RDMA port. Default: 20049.
+nfs_conf_nfsd_rdma_port: 20049
+
+###############################################################################
+# statd
+###############################################################################
+# Reference:
+# * https://www.man7.org/linux/man-pages/man8/rpc.statd.8.html
+
+# Enable statd debugging? Default: False.
+nfs_conf_statd_debug: false
+
+# Statd RPC litener port.
+#
+# Use /etc/services if not set, otherwise chooses a random ephemeral port for
+# each listener socket. Can be used to fix the port value of rpc.statd's
+# listeners when SM_NOTIFY requests must traverse a firewall between clients
+# and servers.
+#
+# Default: 0 (/etc/services).
+nfs_conf_statd_port: 0
+
+# Source port for sm-notify when sending reboot notifications.
+#
+# Default: 0 (random ephermeral port).
+nfs_conf_statd_outgoing_port: 0
+
+# Source interface to send reboot notifications.
+#
+# Values:
+#     {IP}: IP
+#   {HOST}: hostname
+#       '': wildcard address (*) (default)
+#
+# Default: '' (wildcard address).
+nfs_conf_statd_name: ''
+
+# NFS mountd state directory (NSM). Default: '/var/lib/nfs/statd'.
+nfs_conf_statd_state_directory_path: '/var/lib/nfs/statd'
+
+# High availability callout program.
+#
+# Not needed with 2.6+ kernels. Mount nfsd on /proc/fs/nfsd instead.
+#
+# Default: '' (disabled).
+nfs_conf_statd_ha_callout: ''
+
+# Prevent running sm-notify on start up.
+#
+# Preserves existing NSM state number and monitor list.
+#
+# Default: False.
+nfs_conf_statd_no_notify: false
+
+###############################################################################
+# sm-notify
+###############################################################################
+# Reference:
+# * https://www.man7.org/linux/man-pages/man8/sm-notify.8.html
+
+# Enable sm-notify debugging. Default: False.
+nfs_conf_sm_notify_debug: false
+
+# Force notifications even if run since last reboot. Default: False.
+nfs_conf_sm_notify_force: false
+
+# Retry notifications until timeout (seconds).
+#
+# Values:
+#   0: indefinitely until killed
+#
+# Default: 900 (15 minutes).
+nfs_conf_sm_notify_retry_time: 900
+
+# Source port for sm-notify when sending reboot notifications.
+#
+# Default: 0 (random ephermeral port).
+nfs_conf_sm_notify_outgoing_port: 0
+
+# Source interface to send reboot notifications.
+#
+# Values:
+#     {IP}: IP
+#   {HOST}: hostname
+#       '': wildcard address (*) (default)
+#
+# Default: '' (wildcard address).
+nfs_conf_sm_notify_outgoing_addr: ''
+
+# Lift lockd grace period early if no hosts to notify? Default: True.
+nfs_conf_sm_notify_lift_grace: true
+
+###############################################################################
+# svcgssd
+###############################################################################
+# Reference:
+# * https://www.man7.org/linux/man-pages/man8/rpc.svcgssd.8.html
+
+# Use principal.
+#
+# Values:
+#   system: use system default credential (host/FQDN@REALM)
+#   '': use default (nfs/FQDN@REALM) (default)
+#
+# Default: '' (nfs/FQDN@REALM).
+nfs_conf_svcgssd_principal: ''

@@ -1,0 +1,22 @@
+---
+###############################################################################
+# NFS Handlers
+###############################################################################
+
+- name: 'Handlers | restart nfs-server'
+  ansible.builtin.systemd:
+    name: 'nfs-server'
+    state: 'restarted'
+    enabled: true
+    daemon_reload: true
+
+- name: 'Handlers | restart nfs-mountd'
+  ansible.builtin.systemd:
+    name: 'nfs-mountd'
+    state: 'restarted'
+    enabled: true
+    daemon_reload: true
+
+- name: 'Handlers | refresh exports'
+  ansible.builtin.command: '/usr/sbin/exportfs -ra'
+  changed_when: false

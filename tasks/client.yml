@@ -1,0 +1,60 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# NFS Client Configuration
+###############################################################################
+# Configure NFS automounts via systemd or fstab.
+#
+# Args:
+#   mount: dict - one element from nfs_mounts
+#
+# Reference:
+# * https://wiki.archlinux.org/title/NFS#As_systemd_unit
+# * https://wiki.debian.org/NFSServerSetup
+# * https://github.com/zilexa/Homeserver/tree/master/filesystem/networkshares_HowTo-NFSv4.2
+
+- name: 'Client | generate service name'
+  ansible.builtin.set_fact:
+    _nfs_systemd_name: '{{ mount.mount[1:] | replace("/", "-") }}'
+
+- name: 'Client | systemd | enable automount'
+  when: nfs_systemd_automount_enable
+  ansible.builtin.include_role:
+    name: 'r_pufky.srv.systemd'
+  vars:
+    mount_state: '{{ "present" if mount.state != "absent" }}'
+    systemd_mounts:
+      - name: '{{ _nfs_systemd_name }}'
+        state: '{{ mount_state }}'
+        override: false
+        unit:
+          description: 'NFS mount {{ mount.server }}:{{ mount.export }}'
+        mount:
+          what: '{{ mount.server }}:{{ mount.export }}'
+          where: '{{ mount.mount }}'
+          type: 'nfs'
+          options: '{{ mount.options | default(nfs_role_default_mount_options) }}'
+          timeout_sec: '{{ mount.timeout | default(30) }}'
+        install:
+          wanted_by:
+            - 'multi-user.target'
+    systemd_automounts:
+      - name: '{{ _nfs_systemd_name }}'
+        state: '{{ mount_state }}'
+        override: false
+        unit:
+          description: 'Automount NFS {{ mount.server }}:{{ mount.export }}'
+        automount:
+          where: '{{ mount.mount }}'
+        install:
+          wanted_by:
+            - 'multi-user.target'
+
+- name: 'Client | create fstab mount'
+  when: not nfs_systemd_automount_enable
+  ansible.posix.mount:
+    src: '{{ mount.server }}:{{ mount.export }}'
+    path: '{{ mount.mount }}'
+    opts: '{{ mount.options | default(nfs_role_default_mount_options) | join(",") }}'
+    fstype: 'nfs'
+    state: '{{ mount.state }}'
