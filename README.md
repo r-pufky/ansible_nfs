@@ -5,7 +5,7 @@ Manage NFS for ansible hosts.
 [supported platforms](https://github.com/r-pufky/ansible_nfs/blob/main/meta/main.yml)
 
 ## Role Variables
-[defaults](https://github.com/r-pufky/ansible_nfs/tree/main/defaults)
+[defaults](https://github.com/r-pufky/ansible_nfs/tree/main/defaults/main)
 
 ## Ports
 All ports and protocols have been defined for the role.
