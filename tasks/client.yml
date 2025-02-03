@@ -26,7 +26,7 @@
     systemd_mounts:
       - name: '{{ _nfs_systemd_name }}'
         state: '{{ mount_state }}'
-        override: false
+        drop_in: false
         unit:
           description: 'NFS mount {{ mount.server }}:{{ mount.export }}'
         mount:
@@ -41,7 +41,7 @@
     systemd_automounts:
       - name: '{{ _nfs_systemd_name }}'
         state: '{{ mount_state }}'
-        override: false
+        drop_in: false
         unit:
           description: 'Automount NFS {{ mount.server }}:{{ mount.export }}'
         automount:
