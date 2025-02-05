@@ -7,10 +7,10 @@
 #
 # Default configuration supports NFSv4.2.
 
-# Configure NFS server? Default: false.
+# Configure NFS server? Default: False.
 nfs_server: false
 
-# Configure NFS client? Default: false.
+# Configure NFS client? Default: False.
 nfs_client: false
 
 # Enable legacy services?
