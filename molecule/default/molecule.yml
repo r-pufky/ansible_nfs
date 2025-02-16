@@ -38,8 +38,23 @@ provisioner:
         nfs_mounts:
           - server: '127.0.0.1'
             export: '/home/vagrant'
-            mount: '/mnt/client_test'
+            mount: '/mnt/test/client_test'
             state: 'present'
+            options:
+              - 'nfsvers=4'
+              - 'minorversion=2'
+              - 'proto=tcp'
+              - 'fsc'
+              - 'noauto'
+              - 'nofail'
+            timeout: 30
+          - server: '127.0.0.1'
+            export: '/home/vagrant'
+            mount: '/mnt/test/client_test_create_path_owner'
+            state: 'present'
+            mode: '0755'
+            owner: 'mail'
+            group: 'mail'
             options:
               - 'nfsvers=4'
               - 'minorversion=2'

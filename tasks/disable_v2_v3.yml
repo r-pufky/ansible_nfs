@@ -10,6 +10,9 @@
 # PVE node require rpcbind services only for NFS; it is safe to disable if
 # using V4.
 #
+# Disable systemd nfs-server using a drop-in in server.yml when the service is
+# guaranteed to be installed.
+#
 # Decision: disable rpc-statd for client and server - testing showed that base
 #     installs only used rpc-statd for NFS.
 #
@@ -29,24 +32,3 @@
     - 'rpcbind.socket'
     - 'rpc-statd'
     - 'rpc-statd-notify'
-
-- name: 'Disable NFSv2, NFSv3 | disable support'
-  ansible.builtin.include_role:
-    name: 'r_pufky.srv.systemd'
-  vars:
-    systemd_services:
-      # V2 not supported in bookworm; --no-nfs-version 2 will explicitly fail.
-      - name: 'nfs-server'
-        state: 'present'
-        drop_in: true
-        service:
-          exec_start:
-            - ''
-            - '/usr/sbin/rpc.nfsd --no-nfs-version 3'
-      - name: 'nfs-mountd'
-        state: 'present'
-        drop_in: true
-        service:
-          exec_start:
-            - ''
-            - '/usr/sbin/rpc.mountd --no-nfs-version 2 --no-nfs-version 3'

@@ -3,9 +3,10 @@ Description=NFS mount 127.0.0.1:/home/vagrant
 
 [Mount]
 What=127.0.0.1:/home/vagrant
-Where=/mnt/client_test
-Type=nfs
+Where=/mnt/test/client_test
+Type=nfs4
 Options=nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail
+DirectoryMode=0755
 TimeoutSec=30
 
 [Install]

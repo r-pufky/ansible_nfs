@@ -32,8 +32,9 @@
         mount:
           what: '{{ mount.server }}:{{ mount.export }}'
           where: '{{ mount.mount }}'
-          type: 'nfs'
+          type: 'nfs4'
           options: '{{ mount.options | default(nfs_role_default_mount_options) }}'
+          directory_mode: '{{ mount.mode | default("0755") }}'
           timeout_sec: '{{ mount.timeout | default(30) }}'
         install:
           wanted_by:
@@ -46,15 +47,35 @@
           description: 'Automount NFS {{ mount.server }}:{{ mount.export }}'
         automount:
           where: '{{ mount.mount }}'
+          directory_mode: '{{ mount.mode | default("0755") }}'
         install:
           wanted_by:
             - 'multi-user.target'
 
-- name: 'Client | create fstab mount'
+- name: 'Client | fstab'
   when: not nfs_systemd_automount_enable
-  ansible.posix.mount:
-    src: '{{ mount.server }}:{{ mount.export }}'
-    path: '{{ mount.mount }}'
-    opts: '{{ mount.options | default(nfs_role_default_mount_options) | join(",") }}'
-    fstype: 'nfs'
-    state: '{{ mount.state }}'
+  block:
+    - name: 'Client | query mount point'
+      ansible.builtin.stat:
+        path: '{{ mount.mount }}'
+      register: _nfs_query_mount
+
+    # Mounted mount point will fail to set permissions even if root.
+    - name: 'Client | create mount point'
+      when: not _nfs_query_mount.stat.exists
+      ansible.builtin.file:
+        path: '{{ mount.mount }}'
+        mode: '{{ mount.mode | default("0755") }}'
+        state: 'directory'
+      become: true
+
+    - name: 'Client | create fstab mount'
+      notify:
+        - 'Handlers | reload systemd'
+        - 'Handlers | mount -a'
+      ansible.posix.mount:
+        src: '{{ mount.server }}:{{ mount.export }}'
+        path: '{{ mount.mount }}'
+        opts: '{{ mount.options | default(nfs_role_default_mount_options) | join(",") }}'
+        fstype: 'nfs4'
+        state: '{{ mount.state }}'

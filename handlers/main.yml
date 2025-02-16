@@ -1,4 +1,5 @@
 ---
+# yamllint disable rule:line-length
 ###############################################################################
 # NFS Handlers
 ###############################################################################
@@ -20,3 +21,11 @@
 - name: 'Handlers | refresh exports'
   ansible.builtin.command: '/usr/sbin/exportfs -ra'
   changed_when: false
+
+- name: 'Handlers | reload systemd'
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: 'Handlers | mount -a'  # noqa command-instead-of-module mount all NFS shares at once
+  ansible.builtin.command: '/usr/bin/mount -a'
+  changed_when: true

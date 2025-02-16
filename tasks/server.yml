@@ -29,6 +29,27 @@
 # * https://orca.pet/nfs4debian/
 # * https://forum.proxmox.com/threads/nfsv4-server-disabled-under-pve-8.129803/
 
+- name: 'Server | disable NFSv2, NFSv3'
+  ansible.builtin.include_role:
+    name: 'r_pufky.srv.systemd'
+  vars:
+    systemd_services:
+      # V2 not supported in bookworm; --no-nfs-version 2 will explicitly fail.
+      - name: 'nfs-server'
+        state: 'present'
+        drop_in: true
+        service:
+          exec_start:
+            - ''
+            - '/usr/sbin/rpc.nfsd --no-nfs-version 3'
+      - name: 'nfs-mountd'
+        state: 'present'
+        drop_in: true
+        service:
+          exec_start:
+            - ''
+            - '/usr/sbin/rpc.mountd --no-nfs-version 2 --no-nfs-version 3'
+
 - name: 'Server | set /etc/nfs.conf.d/local.conf'
   notify:
     - 'Handlers | restart nfs-server'

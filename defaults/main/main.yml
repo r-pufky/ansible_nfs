@@ -93,6 +93,10 @@ nfs_systemd_automount_enable: true
 
 # NFS shares to mount.
 #
+# Special Case:
+#   * client mount points will be automatically created regardless of systemd
+#     or FSTAB use.
+#
 # nfs_mounts:
 #     list of dict - client NFS mounts.
 #   - server: str - NFS server
@@ -103,7 +107,9 @@ nfs_systemd_automount_enable: true
 #           mounted: create NFS mount, trigger immediate mount (treated as
 #                    present if nfs_systemd_automount_enable).
 #            absent: unmount and remove NFS mount
-#     mount: str - client full path mount location
+#     mount: str - client full path mount location.
+#     mode: str - octal permissions for client mount point.
+#         Default: '0755'.
 #     options: list of str - options for NFS mounting
 #         Default: ['nfsvers=4','minorversion=2','proto=tcp','fsc']
 #     timeout: int - mount timeout in seconds
@@ -113,6 +119,7 @@ nfs_systemd_automount_enable: true
 #   - server: 'example.com'
 #     export: '/data/pictures'
 #     mount: '/data/pictures'
+#     mode: '0755'
 #     state: 'present'
 #     options:
 #       - 'nfsvers=4'

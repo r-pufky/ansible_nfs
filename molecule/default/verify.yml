@@ -43,10 +43,10 @@
   tasks:
     # Test client use of r_pufky.srv.systemd wrapper has no runtime / logic
     # errors. Files rendered are assumed correct as it is tested in systemd.
-    - name: 'Default | verify | nfs client | query mnt-client_test.automount'
+    - name: 'Default | verify | nfs client | query mnt-test-client_test.automount'
       ansible.builtin.copy:
-        src: 'mnt-client_test.automount'
-        dest: '/etc/systemd/system/mnt-client_test.automount'
+        src: 'mnt-test-client_test.automount'
+        dest: '/etc/systemd/system/mnt-test-client_test.automount'
         owner: 'root'
         group: 'root'
         mode: '0644'
@@ -54,20 +54,20 @@
       diff: true
       register: _test_nfs_auto
 
-    - name: 'Default | verify | nfs client | assert expected mnt-client_test.automount'
+    - name: 'Default | verify | nfs client | assert expected mnt-test-client_test.automount'
       ansible.builtin.assert:
         that:
           - not _test_nfs_auto.changed
         fail_msg: |
-          /etc/systemd/system/mnt-client_test.automount is not in expected
+          /etc/systemd/system/mnt-test-client_test.automount is not in expected
           format.
 
           {{ _test_nfs_auto.diff }}
 
-    - name: 'Default | verify | nfs client | query mnt-client_test.mount'
+    - name: 'Default | verify | nfs client | query mnt-test-client_test.mount'
       ansible.builtin.copy:
-        src: 'mnt-client_test.mount'
-        dest: '/etc/systemd/system/mnt-client_test.mount'
+        src: 'mnt-test-client_test.mount'
+        dest: '/etc/systemd/system/mnt-test-client_test.mount'
         owner: 'root'
         group: 'root'
         mode: '0644'
@@ -75,12 +75,12 @@
       diff: true
       register: _test_nfs_mount
 
-    - name: 'Default | verify | nfs client | assert expected mnt-client_test.mount'
+    - name: 'Default | verify | nfs client | assert expected mnt-test-client_test.mount'
       ansible.builtin.assert:
         that:
           - not _test_nfs_mount.changed
         fail_msg: |
-          /etc/systemd/system/mnt-client_test.mount is not in expected format.
+          /etc/systemd/system/mnt-test-client_test.mount is not in expected format.
 
           {{ _test_nfs_auto.diff }}
 
@@ -107,8 +107,44 @@
     - name: 'Default | verify | nfs client | assert fstab nfs mount'
       ansible.builtin.assert:
         that:
-          - '"127.0.0.1:/home/vagrant /mnt/client_test nfs nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail 0 0" in _test_nfs_fstab'
+          - '"127.0.0.1:/home/vagrant /mnt/test/client_test nfs4 nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail 0 0" in _test_nfs_fstab'
         fail_msg: |
           /etc/fstab should contain
 
-            127.0.0.1:/home/vagrant /mnt/client_test nfs nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail 0 0
+            127.0.0.1:/home/vagrant /mnt/test/client_test nfs4 nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail 0 0
+
+    - name: 'Default | verify | nfs client | query /mnt/test/client_test'
+      ansible.builtin.file:
+        path: '/mnt/test/client_test'
+        owner: 'root'
+        group: 'root'
+        mode: '0755'
+      check_mode: true
+      diff: true
+      register: _test_nfs_mount
+
+    - name: 'Enable SSL | verify | SSL enabled | assert /mnt/test/client_test'
+      ansible.builtin.assert:
+        that:
+          - not _test_nfs_mount.changed
+        fail_msg: >
+          /mnt/test/client_test should exist with 0755 root:root
+          {{ _test_nfs_mount.diff }}
+
+    - name: 'Default | verify | nfs client | query /mnt/test/client_test_create_path_owner'
+      ansible.builtin.file:
+        path: '/mnt/test/client_test_create_path_owner'
+        owner: 'root'
+        group: 'root'
+        mode: '0755'
+      check_mode: true
+      diff: true
+      register: _test_nfs_mount
+
+    - name: 'Enable SSL | verify | SSL enabled | assert /mnt/test/client_test_create_path_owner'
+      ansible.builtin.assert:
+        that:
+          - not _test_nfs_mount.changed
+        fail_msg: >
+          /mnt/test/client_test_create_path_owner should exist with 0755 mail:mail
+          {{ _test_nfs_mount.diff }}
