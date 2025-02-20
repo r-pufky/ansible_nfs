@@ -15,6 +15,8 @@ nfs_conf_general_pipefs_directory: '/run/rpc_pipefs'
 ###############################################################################
 # nfsrahead (NFS readahead for mounts)
 ###############################################################################
+# Read ahead is recommended to be 15 * rsize.
+#
 # Reference:
 # * https://www.man7.org/linux/man-pages/man5/nfsrahead.5.html
 
@@ -268,7 +270,7 @@ nfs_conf_mountd_manage_gids: true
 # Open file descriptors limt. Default: 0 (no limit).
 nfs_conf_mountd_descriptors: 0
 
-# Mountd RPC litener port.
+# Mountd RPC listener port.
 #
 # Use /etc/services if not set, otherwise chooses a random ephemeral port for
 # each listener socket. Can be used to fix the port value of rpc.mountd's
@@ -364,7 +366,14 @@ nfs_conf_nfsdcltrack_storagedir: '/var/lib/nfs/nfsdcltrack'
 # Default: False.
 nfs_conf_nfsd_debug: false
 
-# Number of threads to start. Default: 8.
+# Number of threads to start.
+#
+# Recommend setting threads to shares*mounts.
+#
+# Default: 8.
+#
+# Reference:
+# * https://www.admin-magazine.com/HPC/Articles/Useful-NFS-Options-for-Tuning-and-Management
 nfs_conf_nfsd_threads: 8
 
 # Accept NFS requests on specified interfaces.

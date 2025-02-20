@@ -26,8 +26,11 @@ nfs_legacy_services_enable: false
 ###############################################################################
 # Traditional NFS Server Exports. Follow formats from exports (man exports).
 #
-# ZFS filesystems should export directly from ZFS which will automatically use
-# the configured NFS server.
+# ZFS filesystems should export single hosts directly from ZFS which will
+# automatically use the configured NFS server. Complex multi-host exports
+# should be done through nfs_exports.
+#
+# Export nested directories before the corresponding root directories.
 #
 # nfs_exports:
 #     list of dict - NFS exported shares.
@@ -73,11 +76,19 @@ nfs_legacy_services_enable: false
 # Reference:
 # * https://linux.die.net/man/5/exports
 # * https://unix.stackexchange.com/questions/763248/is-fsid-really-needed-for-nfs-export
+# * https://forums.freebsd.org/threads/zfs-and-nfs-to-multiple-nic-netwokrs.35550/
 nfs_exports: []
 
 ###############################################################################
 # NFS Mounts (client)
 ###############################################################################
+# Recommend clients use 9000 MTU (jumbo frames), rsize=1048576, wsize=1048576.
+#
+# Reference:
+# * https://learn.microsoft.com/en-us/azure/azure-netapp-files/performance-linux-nfs-read-ahead
+# * https://www.ibm.com/docs/en/aix/7.2?topic=tuning-tcpip-guidelines-nfs-performance
+# * https://cromwell-intl.com/open-source/performance-tuning/nfs.html
+# * https://linux.die.net/man/5/nfs
 
 # Use systemd automounts instead of /etc/fstab?
 #
