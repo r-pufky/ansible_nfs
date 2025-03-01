@@ -42,11 +42,11 @@ nfs_legacy_services_enable: false
 #               *?: * and ? may be used for wildcard matching hostnames
 #
 #             Values:
-#                  {FQDN}: fully qualified domain names
-#                  {HOST}: partial domain name that can be resolved
-#                  {CIDR}: IPv4/IPv6 CIDR notation; do not use square brackets
-#                  {IPv4}: IPv4
-#                  {IPv6}: do not use square brackets
+#                  {FQDN}: fully qualified domain names.
+#                  {HOST}: partial domain name that can be resolved.
+#                  {CIDR}: IPv4/IPv6 CIDR notation; do not use square brackets.
+#                  {IPv4}: IPv4.
+#                  {IPv6}: IPv6, do not use square brackets.
 #                @{GROUP}: NIS netgroup; only host portion is considered, empty
 #                          hosts or hosts with - are ignored.
 #         options: list of str - exports options
