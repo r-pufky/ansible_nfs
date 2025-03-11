@@ -23,3 +23,4 @@
   loop: '{{ nfs_mounts }}'
   loop_control:
     loop_var: 'mount'
+    label: '{{ mount.mount }}'
