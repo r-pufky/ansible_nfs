@@ -1,5 +1,4 @@
 ---
-# yamllint disable rule:line-length
 ###############################################################################
 # NFS Server Configuration
 ###############################################################################
@@ -31,7 +30,7 @@
 
 - name: 'Server | disable NFSv2, NFSv3'
   ansible.builtin.include_role:
-    name: 'r_pufky.srv.systemd'
+    name: 'r_pufky.deb.systemd'
   vars:
     systemd_services:
       # V2 not supported in bookworm; --no-nfs-version 2 will explicitly fail.

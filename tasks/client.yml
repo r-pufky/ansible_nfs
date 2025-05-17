@@ -12,6 +12,7 @@
 # * https://wiki.archlinux.org/title/NFS#As_systemd_unit
 # * https://wiki.debian.org/NFSServerSetup
 # * https://github.com/zilexa/Homeserver/tree/master/filesystem/networkshares_HowTo-NFSv4.2
+# yamllint enable rule:line-length
 
 - name: 'Client | generate service name'
   ansible.builtin.set_fact:
@@ -20,7 +21,7 @@
 - name: 'Client | systemd | enable automount'
   when: nfs_systemd_automount_enable
   ansible.builtin.include_role:
-    name: 'r_pufky.srv.systemd'
+    name: 'r_pufky.deb.systemd'
   vars:
     mount_state: '{{ "present" if mount.state != "absent" }}'
     systemd_mounts:
@@ -33,7 +34,8 @@
           what: '{{ mount.server }}:{{ mount.export }}'
           where: '{{ mount.mount }}'
           type: 'nfs4'
-          options: '{{ mount.options | default(nfs_role_default_mount_options) }}'
+          options:
+            '{{ mount.options | default(nfs_role_default_mount_options) }}'
           directory_mode: '{{ mount.mode | default("0755") }}'
           timeout_sec: '{{ mount.timeout | default(30) }}'
         install:
@@ -76,6 +78,8 @@
       ansible.posix.mount:
         src: '{{ mount.server }}:{{ mount.export }}'
         path: '{{ mount.mount }}'
-        opts: '{{ mount.options | default(nfs_role_default_mount_options) | join(",") }}'
+        opts: '{{
+            mount.options | default(nfs_role_default_mount_options) | join(",")
+          }}'
         fstype: 'nfs4'
         state: '{{ mount.state }}'

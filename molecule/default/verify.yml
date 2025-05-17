@@ -8,87 +8,55 @@
     - name: 'Default | verify | nfs server | query services'
       ansible.builtin.service_facts:
 
-    - name: 'Default | verify | nfs server | query /etc/nfs.conf.d/local.conf'
-      ansible.builtin.copy:
-        src: 'local.conf'
-        dest: '/etc/nfs.conf.d/local.conf'
-        owner: 'root'
-        group: 'root'
-        mode: '0644'
-      check_mode: true
-      diff: true
-      register: _test_nfs_conf
-
-    - name: 'Default | verify | nfs server | assert expected /etc/resolv.conf'
-      ansible.builtin.assert:
-        that:
-          - not _test_nfs_conf.changed
-        fail_msg: |
-          /etc/nfs.conf.d/local.conf is not in expected format.
-
-          {{ _test_nfs_conf.diff }}
-
     - name: 'Default | verify | nfs server | assert nfs services enabled'
       ansible.builtin.assert:
+        quiet: true
         that:
           - '"nfs-server.service" in ansible_facts.services'
           - '"nfs-mountd.service" in ansible_facts.services'
           - '"nfs-client.target in ansible_facts.services"'
-        fail_msg: 'nfs-server.service, nfs-mountd.service should be exist.'
+        fail_msg: '✘ nfs-server.service, nfs-mountd.service should be exist.'
+
+    - name: 'Default | verify | /etc/nfs.conf.d/local.conf'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'copy.yml'
+      vars:
+        test_name: 'Default | verify | /etc/nfs.conf.d/local.conf'
+        test_src: 'local.conf'
+        test_file: '/etc/nfs.conf.d/local.conf'
+        test_owner: 'root'
+        test_group: 'root'
+        test_mode: '0644'
 
 - name: 'Default | verify | nfs client'
   hosts: 'nfs-debian-12-vm-default'
   gather_facts: false
   become: true
   tasks:
-    # Test client use of r_pufky.srv.systemd wrapper has no runtime / logic
-    # errors. Files rendered are assumed correct as it is tested in systemd.
-    - name: 'Default | verify | nfs client | query mnt-test-client_test.automount'
-      ansible.builtin.copy:
-        src: 'mnt-test-client_test.automount'
-        dest: '/etc/systemd/system/mnt-test-client_test.automount'
-        owner: 'root'
-        group: 'root'
-        mode: '0644'
-      check_mode: true
-      diff: true
-      register: _test_nfs_auto
-
-    - name: 'Default | verify | nfs client | assert expected mnt-test-client_test.automount'
-      ansible.builtin.assert:
-        that:
-          - not _test_nfs_auto.changed
-        fail_msg: |
-          /etc/systemd/system/mnt-test-client_test.automount is not in expected
-          format.
-
-          {{ _test_nfs_auto.diff }}
-
-    - name: 'Default | verify | nfs client | query mnt-test-client_test.mount'
-      ansible.builtin.copy:
-        src: 'mnt-test-client_test.mount'
-        dest: '/etc/systemd/system/mnt-test-client_test.mount'
-        owner: 'root'
-        group: 'root'
-        mode: '0644'
-      check_mode: true
-      diff: true
-      register: _test_nfs_mount
-
-    - name: 'Default | verify | nfs client | assert expected mnt-test-client_test.mount'
-      ansible.builtin.assert:
-        that:
-          - not _test_nfs_mount.changed
-        fail_msg: |
-          /etc/systemd/system/mnt-test-client_test.mount is not in expected format.
-
-          {{ _test_nfs_auto.diff }}
+    - name: 'Default | verify | nfs server | query services'
+      ansible.builtin.service_facts:
 
     - name: 'Default | verify | nfs client | assert nfs services enabled'
       ansible.builtin.assert:
+        quiet: true
         that:
           - '"nfs-client.target in ansible_facts.services"'
-        fail_msg: 'nfs-client.target should be exist.'
+        fail_msg: '✘ nfs-client.target should be exist.'
+
+    # Test client use of r_pufky.deb.systemd wrapper has no runtime / logic
+    # errors. Files rendered are assumed correct as it is tested in systemd.
+    - name: 'Default | verify | nfs client | mnt-test-client_test.automount'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'copy.yml'
+      vars:
+        test_name: 'Default | verify | mnt-test-client_test.automount'
+        test_src: 'mnt-test-client_test.mount'
+        test_file: '/etc/systemd/system/mnt-test-client_test.mount'
+        test_owner: 'root'
+        test_group: 'root'
+        test_mode: '0644'
 
 - name: 'Default | verify | nfs client'
   hosts: 'nfs-debian-12-vm-default-fstab'
@@ -106,45 +74,38 @@
 
     - name: 'Default | verify | nfs client | assert fstab nfs mount'
       ansible.builtin.assert:
+        quiet: true
         that:
           - '"127.0.0.1:/home/vagrant /mnt/test/client_test nfs4 nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail 0 0" in _test_nfs_fstab'
         fail_msg: |
-          /etc/fstab should contain
+          ✘ /etc/fstab should contain
 
             127.0.0.1:/home/vagrant /mnt/test/client_test nfs4 nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail 0 0
 
-    - name: 'Default | verify | nfs client | query /mnt/test/client_test'
-      ansible.builtin.file:
-        path: '/mnt/test/client_test'
-        owner: 'root'
-        group: 'root'
-        mode: '0755'
-      check_mode: true
-      diff: true
-      register: _test_nfs_mount
+    - name: 'Default | verify | nfs client | /mnt/test/client_test'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'file.yml'
+      vars:
+        test_name: 'Default | verify | nfs client | /mnt/test/client_test'
+        test_file: '/mnt/test/client_test'
+        test_owner: 'root'
+        test_group: 'root'
+        test_mode: '0755'
+        test_state: 'directory'
 
-    - name: 'Enable SSL | verify | SSL enabled | assert /mnt/test/client_test'
-      ansible.builtin.assert:
-        that:
-          - not _test_nfs_mount.changed
-        fail_msg: >
-          /mnt/test/client_test should exist with 0755 root:root
-          {{ _test_nfs_mount.diff }}
-
-    - name: 'Default | verify | nfs client | query /mnt/test/client_test_create_path_owner'
-      ansible.builtin.file:
-        path: '/mnt/test/client_test_create_path_owner'
-        owner: 'root'
-        group: 'root'
-        mode: '0755'
-      check_mode: true
-      diff: true
-      register: _test_nfs_mount
-
-    - name: 'Enable SSL | verify | SSL enabled | assert /mnt/test/client_test_create_path_owner'
-      ansible.builtin.assert:
-        that:
-          - not _test_nfs_mount.changed
-        fail_msg: >
-          /mnt/test/client_test_create_path_owner should exist with 0755 mail:mail
-          {{ _test_nfs_mount.diff }}
+    - name: >
+        Default | verify | nfs client |
+        /mnt/test/client_test_create_path_owner
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'file.yml'
+      vars:
+        test_name: >
+          Default | verify | nfs client |
+          /mnt/test/client_test_create_path_owner
+        test_file: '/mnt/test/client_test_create_path_owner'
+        test_owner: 'root'
+        test_group: 'root'
+        test_mode: '0755'
+        test_state: 'directory'

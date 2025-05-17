@@ -1,5 +1,4 @@
 ---
-# yamllint disable rule:line-length
 ###############################################################################
 # NFS Handlers
 ###############################################################################
@@ -26,6 +25,7 @@
   ansible.builtin.systemd:
     daemon_reload: true
 
-- name: 'Handlers | mount -a'  # noqa command-instead-of-module mount all NFS shares at once
+# Mount all NFS shares at once.
+- name: 'Handlers | mount -a'  # noqa command-instead-of-module
   ansible.builtin.command: '/usr/bin/mount -a'
   changed_when: true

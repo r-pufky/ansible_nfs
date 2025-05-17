@@ -13,16 +13,17 @@ All ports and protocols have been defined for the role.
 [defaults/ports.yml](https://github.com/r-pufky/ansible_nfs/blob/main/defaults/main/ports.yml)
 
 ## Dependencies
-Part of the [r_pufky.srv](https://github.com/r-pufky/ansible_collection_srv)
-collection.
+**galaxy-ng** roles cannot be used independently. Part of
+[r_pufky.deb](https://github.com/r-pufky/ansible_collection_deb) collection.
 
 ## Example Playbook
 Support only NFSv4 servers and clients.
 
 Exported directories should be managed by other tasks before using this role;
-ZFS filesystems should export NFS shares via ZFS (see [r_pufky.srv.zfs](https://github.com/r-pufky/ansible_zfs));
-these exports will automatically be shared via the configured nfs-server. Role
-defaults to NFSv4.2 configuration.
+ZFS filesystems should export NFS shares via ZFS (see
+[r_pufky.deb.zfs](https://github.com/r-pufky/ansible_zfs)); these exports will
+automatically be shared via the configured nfs-server. Role defaults to NFSv4.2
+configuration.
 
 A machine can simultaneously have both `nfs_server` and `nfs_client` applied.
 
@@ -30,7 +31,7 @@ Configure NFSv4.2 server and export directories.
 ``` yaml
 - name: 'Manage NFS'
   ansible.builtin.include_role:
-    name: 'r_pufky.srv.nfs'
+    name: 'r_pufky.deb.nfs'
   vars:
   nfs_server: true
   nfs_exports:
@@ -60,7 +61,7 @@ Configure NFSv4.2 client.
 ``` yaml
 - name: 'Manage NFS'
   ansible.builtin.include_role:
-    name: 'r_pufky.srv.nfs'
+    name: 'r_pufky.deb.nfs'
   vars:
   nfs_client: true
   nfs_mounts:
@@ -76,7 +77,7 @@ Configure NFSv4.2 client.
 ```
 
 ## Development
-Configure [environment](https://github.com/r-pufky/ansible_collection_srv/blob/main/docs/dev/environment/README.md)
+Configure [environment](https://github.com/r-pufky/ansible_collection_docs/blob/main/dev/environment/README.md)
 
 Run all unit tests:
 ``` bash

@@ -1,13 +1,16 @@
 ---
-# yamllint disable rule:line-length
 ###############################################################################
 # Ports Configuration
 ###############################################################################
-# Manage firewall with r_pufky.srv.ufw.
+# Manage firewall with r_pufky.deb.ufw.
 #
 # Reference:
 # * https://github.com/r-pufky/ansible_ufw
 # * https://en.wikipedia.org/wiki/Network_File_System#NFSv4
 
 nfs_ports:
-  - {proto: 'tcp', from_ip: 'any', to_port: 2049, direction: 'in', comment: 'nfs 4.2 tcp'}
+  - proto: 'tcp'
+    from_ip: 'any'
+    to_port: 2049
+    direction: 'in'
+    comment: 'nfs 4.2 tcp'
