@@ -1,14 +1,14 @@
 ---
 # yamllint disable rule:line-length
-- name: 'Default | verify | nfs server'
+- name: 'Verify | nfs server'
   hosts: 'all'
   gather_facts: false
   become: true
   tasks:
-    - name: 'Default | verify | nfs server | query services'
+    - name: 'Verify | nfs server | query services'
       ansible.builtin.service_facts:
 
-    - name: 'Default | verify | nfs server | assert nfs services enabled'
+    - name: 'Verify | nfs server | assert nfs services enabled'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -17,27 +17,28 @@
           - '"nfs-client.target in ansible_facts.services"'
         fail_msg: '✘ nfs-server.service, nfs-mountd.service should be exist.'
 
-    - name: 'Default | verify | /etc/nfs.conf.d/local.conf'
+    - name: 'Verify | /etc/nfs.conf.d/local.conf'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'copy.yml'
       vars:
-        test_name: 'Default | verify | /etc/nfs.conf.d/local.conf'
+        test_name: 'Verify | /etc/nfs.conf.d/local.conf'
         test_src: 'local.conf'
         test_file: '/etc/nfs.conf.d/local.conf'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0644'
+        test_diff: true
 
-- name: 'Default | verify | nfs client'
+- name: 'Verify | nfs client'
   hosts: 'nfs-debian-12-vm-default'
   gather_facts: false
   become: true
   tasks:
-    - name: 'Default | verify | nfs server | query services'
+    - name: 'Verify | nfs server | query services'
       ansible.builtin.service_facts:
 
-    - name: 'Default | verify | nfs client | assert nfs services enabled'
+    - name: 'Verify | nfs client | assert nfs services enabled'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -46,33 +47,34 @@
 
     # Test client use of r_pufky.deb.systemd wrapper has no runtime / logic
     # errors. Files rendered are assumed correct as it is tested in systemd.
-    - name: 'Default | verify | nfs client | mnt-test-client_test.automount'
+    - name: 'Verify | nfs client | mnt-test-client_test.automount'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'copy.yml'
       vars:
-        test_name: 'Default | verify | mnt-test-client_test.automount'
+        test_name: 'Verify | mnt-test-client_test.automount'
         test_src: 'mnt-test-client_test.mount'
         test_file: '/etc/systemd/system/mnt-test-client_test.mount'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0644'
+        test_diff: true
 
-- name: 'Default | verify | nfs client'
+- name: 'Verify | nfs client'
   hosts: 'nfs-debian-12-vm-default-fstab'
   gather_facts: false
   become: true
   tasks:
-    - name: 'Default | verify | nfs client | query /etc/fstab'
+    - name: 'Verify | nfs client | query /etc/fstab'
       ansible.builtin.slurp:
         path: '/etc/fstab'
       register: _test_nfs_client
 
-    - name: 'Default | verify | nfs client | parse /etc/fstab'
+    - name: 'Verify | nfs client | parse /etc/fstab'
       ansible.builtin.set_fact:
         _test_nfs_fstab: '{{ _test_nfs_client.content | b64decode }}'
 
-    - name: 'Default | verify | nfs client | assert fstab nfs mount'
+    - name: 'Verify | nfs client | assert fstab nfs mount'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -82,30 +84,32 @@
 
             127.0.0.1:/home/vagrant /mnt/test/client_test nfs4 nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail 0 0
 
-    - name: 'Default | verify | nfs client | /mnt/test/client_test'
+    - name: 'Verify | nfs client | /mnt/test/client_test'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'file.yml'
       vars:
-        test_name: 'Default | verify | nfs client | /mnt/test/client_test'
+        test_name: 'Verify | nfs client | /mnt/test/client_test'
         test_file: '/mnt/test/client_test'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0755'
         test_state: 'directory'
+        test_diff: true
 
     - name: >
-        Default | verify | nfs client |
+        Verify | nfs client |
         /mnt/test/client_test_create_path_owner
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'file.yml'
       vars:
         test_name: >
-          Default | verify | nfs client |
+          Verify | nfs client |
           /mnt/test/client_test_create_path_owner
         test_file: '/mnt/test/client_test_create_path_owner'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0755'
         test_state: 'directory'
+        test_diff: true

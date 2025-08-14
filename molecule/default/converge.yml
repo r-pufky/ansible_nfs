@@ -1,9 +1,9 @@
 ---
-- name: 'Default | converge'
+- name: 'Converge'
   hosts: 'all'
   gather_facts: false
   become: true
   tasks:
-    - name: 'Default | converge | apply r_pufky.deb.nfs'
+    - name: 'Converge | apply r_pufky.deb.nfs'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.nfs'
