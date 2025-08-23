@@ -70,23 +70,25 @@ provisioner:
               - 'nofail'
             timeout: 30
     host_vars:
-      nfs-debian-12-vm-default-fstab:
+      nfs-debian-13-vm-default-fstab:
         nfs_systemd_automount_enable: false
 platforms:
-  - name: 'nfs-debian-12-vm-default'
-    box: 'debian/bookworm64'
+  - name: 'nfs-debian-13-vm-default'
+    # TODO(role): switch to debian/trixie64 when released.
+    box: 'debian/testing64'
     memory: 4096
     cpus: 2
     interfaces:
-      - network_name: private_network  # network_name required
+      - network_name: private_network  # network_name required.
         auto_config: true
         type: 'dhcp'
-  - name: 'nfs-debian-12-vm-default-fstab'
-    box: 'debian/bookworm64'
+  - name: 'nfs-debian-13-vm-default-fstab'
+    # TODO(role): switch to debian/trixie64 when released.
+    box: 'debian/testing64'
     memory: 4096
     cpus: 2
     interfaces:
-      - network_name: private_network  # network_name required
+      - network_name: private_network  # network_name required.
         auto_config: true
         type: 'dhcp'
 verifier:

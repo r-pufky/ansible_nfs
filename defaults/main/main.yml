@@ -34,22 +34,22 @@ nfs_legacy_services_enable: false
 #
 # nfs_exports:
 #     list of dict - NFS exported shares.
-#   - source: str - source directory to share
+#   - source: str - Source directory to share.
 #     hosts:
-#         list of dict - host options
-#       - host: str - host machine
+#         list of dict - Host options.
+#       - host: str - Host machine.
 #             Special Case:
-#               *?: * and ? may be used for wildcard matching hostnames
+#               *?: * and ? may be used for wildcard matching hostnames.
 #
 #             Values:
-#                  {FQDN}: fully qualified domain names.
-#                  {HOST}: partial domain name that can be resolved.
+#                  {FQDN}: Fully qualified domain names.
+#                  {HOST}: Partial domain name that can be resolved.
 #                  {CIDR}: IPv4/IPv6 CIDR notation; do not use square brackets.
 #                  {IPv4}: IPv4.
 #                  {IPv6}: IPv6, do not use square brackets.
 #                @{GROUP}: NIS netgroup; only host portion is considered, empty
 #                          hosts or hosts with - are ignored.
-#         options: list of str - exports options
+#         options: list of str - Exports options.
 #
 # nfs_exports:
 #   - source: '/data/pictures'
@@ -105,25 +105,25 @@ nfs_systemd_automount_enable: true
 # NFS shares to mount.
 #
 # Special Case:
-#   * client mount points will be automatically created regardless of systemd
+#   * Client mount points will be automatically created regardless of systemd
 #     or FSTAB use.
 #
 # nfs_mounts:
-#     list of dict - client NFS mounts.
-#   - server: str - NFS server
-#     export: str - NFS export path
-#     state: str - NFS mount state
+#     list of dict - Client NFS mounts.
+#   - server: str - NFS server.
+#     export: str - NFS export path.
+#     state: str - NFS mount state.
 #         Values:
-#           present: create NFS mount, do not trigger immediate mount
-#           mounted: create NFS mount, trigger immediate mount (treated as
+#           present: Create NFS mount, do not trigger immediate mount.
+#           mounted: Create NFS mount, trigger immediate mount (treated as
 #                    present if nfs_systemd_automount_enable).
-#            absent: unmount and remove NFS mount
-#     mount: str - client full path mount location.
-#     mode: str - octal permissions for client mount point.
+#            absent: Unmount and remove NFS mount
+#     mount: str - Client full path mount location.
+#     mode: str - Octal permissions for client mount point.
 #         Default: '0755'.
-#     options: list of str - options for NFS mounting
+#     options: list of str - Options for NFS mounting.
 #         Default: ['nfsvers=4','minorversion=2','proto=tcp','fsc']
-#     timeout: int - mount timeout in seconds
+#     timeout: int - Mount timeout in seconds.
 #         Default: 30.
 #
 # nfs_mounts:

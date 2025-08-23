@@ -58,7 +58,7 @@ nfs_conf_nfsrahead_default: 128
 # * https://serverfault.com/questions/1143373/nfsv4-fsid-option-and-the-purpose-of-export-roots
 nfs_conf_exports_rootdir: ''
 
-# Enable exportfs debugging.
+# Enable exportfs debugging?
 #
 # TODO(role): noop until debug patch fix lands.
 #     Reference: https://patchwork.kernel.org/project/linux-nfs/patch/20221004174015.1362841-1-sorenson@redhat.com/
@@ -78,16 +78,16 @@ nfs_conf_gssd_verbosity: 0
 # RPC verbosity, equivalent to number of -v. Default: 0.
 nfs_conf_gssd_rpc_verbosity: 0
 
-# Use memcache. Default: False.
+# Use memcache? Default: False.
 nfs_conf_gssd_use_memcache: false
 
-# Use local system machine credentials. Default: True.
+# Use local system machine credentials? Default: True.
 nfs_conf_gssd_use_machine_creds: true
 
-# Enable GSSAPI proxy requests. Default: False.
+# Enable GSSAPI proxy requests? Default: False.
 nfs_conf_gssd_use_gss_proxy: false
 
-# Avoid reverse DNS lookups.
+# Avoid reverse DNS lookups?
 #
 # DNS lookups are required if partially qualified, or non canonical names are
 # regularly used.
@@ -99,7 +99,7 @@ nfs_conf_gssd_use_gss_proxy: false
 # Default: True.
 nfs_conf_gssd_avoid_dns: true
 
-# Restrict sessions to weak encryption types. Default: False.
+# Restrict sessions to weak encryption types? Default: False.
 nfs_conf_gssd_limit_to_legacy_enctypes: false
 
 # Kernel GSS context timeout (seconds).
@@ -135,7 +135,7 @@ nfs_conf_gssd_cred_cache_directory: []
 # Kerberos realm preferred when scanning available credentials. Default: ''.
 nfs_conf_gssd_preferred_realm: ''
 
-# Use $HOME instead of / for k5identity files.
+# Use $HOME instead of / for k5identity files?
 #
 # Use a principal based on host and/or service parameters listed in
 # $HOME/.k5identity; instead of first match found in
@@ -147,13 +147,13 @@ nfs_conf_gssd_set_home: true
 # Upcall thread timeout (seconds).
 #
 # Special Case:
-#     5: minimum timeout
-#   600: maximum timeout
+#     5: Minimum timeout.
+#   600: Maximum timeout.
 #
 # Default: 30.
 nfs_conf_gssd_upcall_timeout: 30
 
-# Report -ETIMEDOUT to kernel for upcall thread timeouts. Default: False.
+# Report -ETIMEDOUT to kernel for upcall thread timeouts? Default: False.
 nfs_conf_gssd_cancel_timed_out_upcalls: false
 
 ###############################################################################
@@ -177,16 +177,16 @@ nfs_conf_lockd_udp_port: 0
 # Enable debugging.
 #
 # Values:
-#       all: all debug messages
-#      auth: authentication messages
-#      call: call messages
-#   general: general messages
-#     parse: file parsing messages
+#       all: All debug messages.
+#      auth: Authentication messages.
+#      call: Call messages.
+#   general: General messages.
+#     parse: File parsing messages.
 #
 # Default: '' (disabled).
 nfs_conf_exportd_debug: ''
 
-# Map UIDs to GIDs.
+# Map UIDs to GIDs?
 #
 # Accept requests from the kernel to map user id numbers into lists of group id
 # numbers for use in access control. An NFS request will normally (except when
@@ -212,7 +212,7 @@ nfs_conf_exportd_state_directory_path: '/var/lib/nfs'
 # Default: 1.
 nfs_conf_exportd_threads: 1
 
-# Use only IP for caching.
+# Use only IP for caching?
 #
 # Normally each client IP address is matched against each host identifier
 # (name, wildcard, netgroup etc) found in /etc/exports and a combined identity
@@ -244,16 +244,16 @@ nfs_conf_exportd_ttl: 1800
 # Enable debugging.
 #
 # Values:
-#       all: all debug messages
-#      auth: authentication messages
-#      call: call messages
-#   general: general messages
-#     parse: file parsing messages
+#       all: All debug messages.
+#      auth: Authentication messages.
+#      call: Call messages.
+#   general: General messages.
+#     parse: File parsing messages.
 #
 # Default: '' (disabled).
 nfs_conf_mountd_debug: ''
 
-# Map UIDs to GIDs.
+# Map UIDs to GIDs?
 #
 # Accept requests from the kernel to map user id numbers into lists of group id
 # numbers for use in access control. An NFS request will normally (except when
@@ -311,7 +311,7 @@ nfs_conf_mountd_state_directory_path: '/var/lib/nfs'
 # Default: '' (disabled).
 nfs_conf_mountd_ha_callout: ''
 
-# Use only IP for caching.
+# Use only IP for caching?
 #
 # Normally each client IP address is matched against each host identifier
 # (name, wildcard, netgroup etc) found in /etc/exports and a combined identity
@@ -379,8 +379,8 @@ nfs_conf_nfsd_threads: 8
 # Accept NFS requests on specified interfaces.
 #
 # Values:
-#     {IP}: IP
-#   {HOST}: hostname
+#     {IP}: IP.
+#   {HOST}: Hostname.
 #
 # Default: [] (all).
 nfs_conf_nfsd_host: []
@@ -402,42 +402,42 @@ nfs_conf_nfsd_grace_time: 90
 # server.
 #
 # Values:
-#     10: minimum lease
-#   3600: maximum lease
+#     10: Minimum lease.
+#   3600: Maximum lease.
 #
 # Default: 90.
 nfs_conf_nfsd_lease_time: 90
 
-# Enable UDP. Default: False.
+# Enable UDP? Default: False.
 nfs_conf_nfsd_udp: false
 
-# Enable TCP. Default: True.
+# Enable TCP? Default: True.
 nfs_conf_nfsd_tcp: true
 
-# Enable NFSv3 versions.
+# Enable NFSv3 versions?
 #
 # Individual versions must still be enabled.
 #
 # Default: False.
 nfs_conf_nfsd_vers3: false
 
-# Enable NFSv4 versions.
+# Enable NFSv4 versions?
 #
 # Individual versions must still be enabled.
 #
 # Default: True.
 nfs_conf_nfsd_vers4: true
 
-# Enable NFSv4.0 (requires nfs_conf_nfsd_vers4). Default: False.
+# Enable NFSv4.0 (requires nfs_conf_nfsd_vers4)? Default: False.
 nfs_conf_nfsd_vers40: false
 
-# Enable NFSv4.1 (requires nfs_conf_nfsd_vers4). Default: False.
+# Enable NFSv4.1 (requires nfs_conf_nfsd_vers4)? Default: False.
 nfs_conf_nfsd_vers41: false
 
-# Enable NFSv4.2 (requires nfs_conf_nfsd_vers4). Default: True.
+# Enable NFSv4.2 (requires nfs_conf_nfsd_vers4)? Default: True.
 nfs_conf_nfsd_vers42: true
 
-# Enable RDMA. Default: False.
+# Enable RDMA? Default: False.
 nfs_conf_nfsd_rdma: false
 
 # RDMA port. Default: 20049.
@@ -470,9 +470,9 @@ nfs_conf_statd_outgoing_port: 0
 # Source interface to send reboot notifications.
 #
 # Values:
-#     {IP}: IP
-#   {HOST}: hostname
-#       '': wildcard address (*) (default)
+#     {IP}: IP.
+#   {HOST}: Hostname.
+#       '': Wildcard address (*) (default).
 #
 # Default: '' (wildcard address).
 nfs_conf_statd_name: ''
@@ -487,7 +487,7 @@ nfs_conf_statd_state_directory_path: '/var/lib/nfs/statd'
 # Default: '' (disabled).
 nfs_conf_statd_ha_callout: ''
 
-# Prevent running sm-notify on start up.
+# Prevent running sm-notify on start up?
 #
 # Preserves existing NSM state number and monitor list.
 #
@@ -500,16 +500,16 @@ nfs_conf_statd_no_notify: false
 # Reference:
 # * https://www.man7.org/linux/man-pages/man8/sm-notify.8.html
 
-# Enable sm-notify debugging. Default: False.
+# Enable sm-notify debugging? Default: False.
 nfs_conf_sm_notify_debug: false
 
-# Force notifications even if run since last reboot. Default: False.
+# Force notifications even if run since last reboot? Default: False.
 nfs_conf_sm_notify_force: false
 
 # Retry notifications until timeout (seconds).
 #
 # Values:
-#   0: indefinitely until killed
+#   0: Indefinitely until killed.
 #
 # Default: 900 (15 minutes).
 nfs_conf_sm_notify_retry_time: 900
@@ -522,9 +522,9 @@ nfs_conf_sm_notify_outgoing_port: 0
 # Source interface to send reboot notifications.
 #
 # Values:
-#     {IP}: IP
-#   {HOST}: hostname
-#       '': wildcard address (*) (default)
+#     {IP}: IP.
+#   {HOST}: Hostname.
+#       '': Wildcard address (*) (default).
 #
 # Default: '' (wildcard address).
 nfs_conf_sm_notify_outgoing_addr: ''
@@ -541,8 +541,8 @@ nfs_conf_sm_notify_lift_grace: true
 # Use principal.
 #
 # Values:
-#   system: use system default credential (host/FQDN@REALM)
-#   '': use default (nfs/FQDN@REALM) (default)
+#   system: USE system default credential (host/FQDN@REALM).
+#       '': USE default (nfs/FQDN@REALM) (default).
 #
 # Default: '' (nfs/FQDN@REALM).
 nfs_conf_svcgssd_principal: ''

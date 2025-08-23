@@ -31,7 +31,7 @@
         test_diff: true
 
 - name: 'Verify | nfs client'
-  hosts: 'nfs-debian-12-vm-default'
+  hosts: 'nfs-debian-13-vm-default'
   gather_facts: false
   become: true
   tasks:
@@ -61,7 +61,7 @@
         test_diff: true
 
 - name: 'Verify | nfs client'
-  hosts: 'nfs-debian-12-vm-default-fstab'
+  hosts: 'nfs-debian-13-vm-default-fstab'
   gather_facts: false
   become: true
   tasks:
