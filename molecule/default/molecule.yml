@@ -74,8 +74,7 @@ provisioner:
         nfs_systemd_automount_enable: false
 platforms:
   - name: 'nfs-debian-13-vm-default'
-    # TODO(role): switch to debian/trixie64 when released.
-    box: 'debian/testing64'
+    box: 'inception-of-things/debian-trixie'
     memory: 4096
     cpus: 2
     interfaces:
@@ -83,8 +82,7 @@ platforms:
         auto_config: true
         type: 'dhcp'
   - name: 'nfs-debian-13-vm-default-fstab'
-    # TODO(role): switch to debian/trixie64 when released.
-    box: 'debian/testing64'
+    box: 'inception-of-things/debian-trixie'
     memory: 4096
     cpus: 2
     interfaces:
