@@ -19,6 +19,8 @@ All ports and protocols have been defined for the role.
 ## Example Playbook
 Support only NFSv4 servers and clients.
 
+[Additional documentation](http://r-pufky.github.io/r-pufky/docs/service/nfs).
+
 Exported directories should be managed by other tasks before using this role;
 ZFS filesystems should export NFS shares via ZFS (see
 [r_pufky.deb.zfs](https://github.com/r-pufky/ansible_zfs)); these exports will
