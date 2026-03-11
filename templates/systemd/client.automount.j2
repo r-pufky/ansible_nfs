@@ -1,0 +1,9 @@
+[Unit]
+Description=Automount NFS {{ mount.server }}:{{ mount.export }}
+
+[Mount]
+Where={{ mount.mount }}
+DirectoryMode={{ mount.mode | default("0755") }}
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,4 @@
+# V2 not supported in bookworm; --no-nfs-version 2 will explicitly fail.
+[Service]
+ExecStart=
+ExecStart=/usr/sbin/rpc.nfsd --no-nfs-version 3

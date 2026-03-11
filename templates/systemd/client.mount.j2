@@ -1,0 +1,13 @@
+[Unit]
+Description=NFS mount {{ mount.server }}:{{ mount.export }}
+
+[Mount]
+What={{ mount.server }}:{{ mount.export }}
+Where={{ mount.mount }}
+Type=nfs4
+Options={{ mount.options | default(nfs___app._default_mount_options) | join(',') }}
+DirectoryMode={{ mount.mode | default("0755") }}
+TimeoutSec={{ mount.timeout | default(30) }}
+
+[Install]
+WantedBy=multi-user.target

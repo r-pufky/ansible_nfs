@@ -1,28 +1,42 @@
 ---
-# yamllint disable rule:line-length
-- name: 'Verify | nfs server'
+- name: 'Verify'
   hosts: 'all'
   gather_facts: false
   become: true
   tasks:
-    - name: 'Verify | nfs server | query services'
+    - name: 'Verify | fact | query services'
       ansible.builtin.service_facts:
 
-    - name: 'Verify | nfs server | assert nfs services enabled'
+    - name: 'Verify | assert | nfs services enabled'
       ansible.builtin.assert:
         quiet: true
         that:
           - '"nfs-server.service" in ansible_facts.services'
           - '"nfs-mountd.service" in ansible_facts.services'
-          - '"nfs-client.target in ansible_facts.services"'
         fail_msg: '✘ nfs-server.service, nfs-mountd.service should be exist.'
 
-    - name: 'Verify | /etc/nfs.conf.d/local.conf'
+    # 2.20: Targets are no longer included in service facts.
+    - name: 'Verify | cmd | query nfs-client.target'
+      ansible.builtin.command: 'systemctl status nfs-client.target'
+      changed_when: false
+      register: nfs__test_cmd
+
+    - name: 'Verify | assert | nfs-client.target active'
+      ansible.builtin.assert:
+        quiet: true
+        that:
+          - nfs__test_cmd.rc == 0
+          - '"Active: active" in nfs__test_cmd.stdout'
+        fail_msg: |
+
+          ✘ nfs-client.target should be active.
+
+    - name: 'Verify | test | /etc/nfs.conf.d/local.conf'
       ansible.builtin.include_role:
-        name: 'r_pufky.lib.tests'
+        name: 'r_pufky.data.test'
         tasks_from: 'copy.yml'
       vars:
-        test_name: 'Verify | /etc/nfs.conf.d/local.conf'
+        test_name: 'Verify | test | /etc/nfs.conf.d/local.conf'
         test_src: 'local.conf'
         test_file: '/etc/nfs.conf.d/local.conf'
         test_owner: 'root'
@@ -30,29 +44,33 @@
         test_mode: '0644'
         test_diff: true
 
-- name: 'Verify | nfs client'
-  hosts: 'nfs-debian-13-vm-default'
+- name: 'Verify'
+  hosts: 'nfs-default'
   gather_facts: false
   become: true
   tasks:
-    - name: 'Verify | nfs server | query services'
-      ansible.builtin.service_facts:
+    - name: 'Verify | cmd | query nfs-client.target'
+      ansible.builtin.command: 'systemctl status nfs-client.target'
+      changed_when: false
+      register: nfs__test_cmd
 
-    - name: 'Verify | nfs client | assert nfs services enabled'
+    - name: 'Verify | assert | nfs-client.target active'
       ansible.builtin.assert:
         quiet: true
         that:
-          - '"nfs-client.target in ansible_facts.services"'
-        fail_msg: '✘ nfs-client.target should be exist.'
+          - nfs__test_cmd.rc == 0
+          - '"Active: active" in nfs__test_cmd.stdout'
+        fail_msg: |
 
-    # Test client use of r_pufky.deb.systemd wrapper has no runtime / logic
-    # errors. Files rendered are assumed correct as it is tested in systemd.
-    - name: 'Verify | nfs client | mnt-test-client_test.automount'
+          ✘ nfs-client.target should be active.
+
+    - name: 'Verify | test | /etc/systemd/system/mnt-test-client_test.mount'
       ansible.builtin.include_role:
-        name: 'r_pufky.lib.tests'
+        name: 'r_pufky.data.test'
         tasks_from: 'copy.yml'
       vars:
-        test_name: 'Verify | mnt-test-client_test.automount'
+        test_name:
+          'Verify | test | /etc/systemd/system/mnt-test-client_test.mount'
         test_src: 'mnt-test-client_test.mount'
         test_file: '/etc/systemd/system/mnt-test-client_test.mount'
         test_owner: 'root'
@@ -61,35 +79,37 @@
         test_diff: true
 
 - name: 'Verify | nfs client'
-  hosts: 'nfs-debian-13-vm-default-fstab'
+  hosts: 'nfs-default-fstab'
   gather_facts: false
   become: true
   tasks:
-    - name: 'Verify | nfs client | query /etc/fstab'
+    - name: 'Verify | filesystem | query /etc/fstab'
       ansible.builtin.slurp:
         path: '/etc/fstab'
-      register: _test_nfs_client
+      register: nfs__test_flg_client
 
-    - name: 'Verify | nfs client | parse /etc/fstab'
+    - name: 'Verify | fact | parse /etc/fstab'
       ansible.builtin.set_fact:
-        _test_nfs_fstab: '{{ _test_nfs_client.content | b64decode }}'
+        nfs__test_fstab: '{{ nfs__test_flg_client.content | b64decode }}'
 
-    - name: 'Verify | nfs client | assert fstab nfs mount'
+    # yamllint disable rule:line-length
+    - name: 'Verify | assert | fstab nfs mount'
       ansible.builtin.assert:
         quiet: true
         that:
-          - '"127.0.0.1:/home/vagrant /mnt/test/client_test nfs4 nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail 0 0" in _test_nfs_fstab'
+          - '"127.0.0.1:/home/vagrant /mnt/test/client_test nfs4 nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail 0 0" in nfs__test_fstab'
         fail_msg: |
-          ✘ /etc/fstab should contain
 
-            127.0.0.1:/home/vagrant /mnt/test/client_test nfs4 nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail 0 0
+          ✘ /etc/fstab should contain:
 
-    - name: 'Verify | nfs client | /mnt/test/client_test'
+          127.0.0.1:/home/vagrant /mnt/test/client_test nfs4 nfsvers=4,minorversion=2,proto=tcp,fsc,noauto,nofail 0 0
+
+    - name: 'Verify | test | /mnt/test/client_test'
       ansible.builtin.include_role:
-        name: 'r_pufky.lib.tests'
+        name: 'r_pufky.data.test'
         tasks_from: 'file.yml'
       vars:
-        test_name: 'Verify | nfs client | /mnt/test/client_test'
+        test_name: 'Verify | test | /mnt/test/client_test'
         test_file: '/mnt/test/client_test'
         test_owner: 'root'
         test_group: 'root'
@@ -97,16 +117,13 @@
         test_state: 'directory'
         test_diff: true
 
-    - name: >
-        Verify | nfs client |
-        /mnt/test/client_test_create_path_owner
+    - name: 'Verify | test | /mnt/test/client_test_create_path_owner'
       ansible.builtin.include_role:
-        name: 'r_pufky.lib.tests'
+        name: 'r_pufky.data.test'
         tasks_from: 'file.yml'
       vars:
-        test_name: >
-          Verify | nfs client |
-          /mnt/test/client_test_create_path_owner
+        test_name:
+          'Verify | test | /mnt/test/client_test_create_path_owner'
         test_file: '/mnt/test/client_test_create_path_owner'
         test_owner: 'root'
         test_group: 'root'

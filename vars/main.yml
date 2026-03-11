@@ -1,13 +1,25 @@
 ---
-# yamllint disable rule:line-length
 ###############################################################################
 # NFS Role Options
 ###############################################################################
 
-# Last time debian options were validated against a default configuration.
-nfs_role_validate_date: '2025-08-22'
-nfs_role_validate_release: 'trixie'
+nfs___release: "{{ {} | r_pufky.data.v3(
 
+    _date='2026-03-11',
+    _debian='trixie',
+  ) }}"
+
+nfs___app: "{{ {} | r_pufky.data.v3(
+
+    _exports='/etc/exports',
+    _local='/etc/nfs.conf.d/local.conf',
+    _systemd_dir='/etc/systemd/system',
+    _server_drop_in='/etc/systemd/system/nfs-server.service.d/override.conf',
+    _mountd_drop_in='/etc/systemd/system/nfs-mountd.service.d/override.conf',
+    _default_mount_options=['nfsvers=4', 'minorversion=2', 'proto=tcp', 'fsc'],
+  ) }}"
+
+# yamllint disable rule:line-length
 ###############################################################################
 # APT Packages
 ###############################################################################
@@ -16,37 +28,10 @@ nfs_role_validate_release: 'trixie'
 # Reference:
 # * https://github.com/zilexa/Homeserver/tree/master/filesystem/networkshares_HowTo-NFSv4.2
 # * https://wiki.debian.org/NFSServerSetup
+# yamllint enable rule:line-length
 
-nfs_role_server_packages:
+nfs___server_packages:
   - 'nfs-kernel-server'
 
-nfs_role_client_packages:
+nfs___client_packages:
   - 'nfs-common'
-
-nfs_role_default_mount_options:
-  - 'nfsvers=4'
-  - 'minorversion=2'
-  - 'proto=tcp'
-  - 'fsc'
-
-###############################################################################
-# NFS on LXC on Proxmox.
-###############################################################################
-# Apply this to bare metal machines. NFS LXC containers currently do not work
-# with proxmox 7:
-# * NFS does not support user namespaces, and therefore must be executed in
-#   privileged container or directly on the server. Proxmox already uses NFS.
-# * LXC privileged container requires features: mount=nfs,nesting=1; but
-#   currently does not boot with network support.
-# * Unprivileged containers cannot mount NFS.
-# * apparmor can be run unconfined to enable nfs rpc_pipefs support, otherwise
-#   a custom apparmor profile is required on Proxmox.
-#
-# TODO(role): re-evaluate this with PVE 8+.
-#
-# Reference:
-# * https://forum.proxmox.com/threads/lxc-aa_profile-is-deprecated-and-was-renamed-to-lxc-apparmor-profile.61332/
-# * https://forum.proxmox.com/threads/lxc-aa_profile-is-deprecated-and-was-renamed-to-lxc-apparmor-profile.38505/
-# * https://www.hungred.com/how-to/setup-nfs-server-lxc-proxmox/
-# * https://github.com/lxc/lxd/issues/2703
-# * https://forum.proxmox.com/threads/lxc-container-nfs-server.43091/

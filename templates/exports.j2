@@ -7,7 +7,7 @@
 # Example for NFSv4:
 # /srv/nfs4        gss/krb5i(rw,sync,fsid=0,crossmnt,no_subtree_check)
 # /srv/nfs4/homes  gss/krb5i(rw,sync,no_subtree_check)
-{% for export in nfs_exports %}
+{% for export in nfs_cfg_exports %}
 {{ export.source }} {% for host in export.hosts %}{{ host.host }}({{ host.options|join(',') }}) {% endfor %}
 
 {% endfor %}

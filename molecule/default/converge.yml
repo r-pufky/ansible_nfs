@@ -4,6 +4,6 @@
   gather_facts: false
   become: true
   tasks:
-    - name: 'Converge | apply r_pufky.deb.nfs'
+    - name: 'Converge | role | r_pufky.deb.nfs'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.nfs'

@@ -7,19 +7,19 @@
 # Tests:
 # * defaults, exports, and services are running.
 
+
 dependency:
   name: 'galaxy'
 driver:
   name: 'vagrant'
   provider:
-    name: 'virtualbox'
-    config_options:
-      ssh.keep_alive: true
-      ssh.remote_user: 'root'
-    options:
-      append_platform_to_hostname: false
+    name: 'libvirt'
+    type: 'libvirt'
 provisioner:
   name: 'ansible'
+  connection_options:
+    ansible_ssh_user: 'vagrant'
+    ansible_become: true
   config_options:
     defaults:
       interpreter_python: 'auto_silent'
@@ -27,9 +27,9 @@ provisioner:
   inventory:
     group_vars:
       all:
-        nfs_server: true
-        nfs_client: true
-        nfs_exports:
+        nfs_flg_server: true
+        nfs_flg_client: true
+        nfs_cfg_exports:
           - source: '/home/vagrant'
             hosts:
               - host: '127.0.0.1'
@@ -41,7 +41,7 @@ provisioner:
                   - 'no_subtree_check'
                   - 'anonuid=1000'
                   - 'anongid=1000'
-        nfs_mounts:
+        nfs_cfg_mounts:
           - server: '127.0.0.1'
             export: '/home/vagrant'
             mount: '/mnt/test/client_test'
@@ -70,42 +70,32 @@ provisioner:
               - 'nofail'
             timeout: 30
     host_vars:
-      nfs-debian-13-vm-default-fstab:
-        nfs_systemd_automount_enable: false
+      nfs-default-fstab:
+        nfs_flg_systemd_automount: false
 platforms:
-  - name: 'nfs-debian-13-vm-default'
-    box: 'inception-of-things/debian-trixie'
+  - name: 'nfs-default'
+    box: 'debian/trixie64'
     memory: 4096
     cpus: 2
     interfaces:
-      - network_name: private_network  # network_name required.
+      - network_name: 'private_network'
         auto_config: true
         type: 'dhcp'
-  - name: 'nfs-debian-13-vm-default-fstab'
-    box: 'inception-of-things/debian-trixie'
+  - name: 'nfs-default-fstab'
+    box: 'debian/trixie64'
     memory: 4096
     cpus: 2
     interfaces:
-      - network_name: private_network  # network_name required.
+      - network_name: 'private_network'
         auto_config: true
         type: 'dhcp'
 verifier:
   name: 'ansible'
-lint: |
-  set -e
-  yamllint .
-  ansible-lint .
 scenario:
   test_sequence:
-    # - 'dependency'
-    # - 'cleanup'
     - 'destroy'
     - 'syntax'
     - 'create'
-    # - 'prepare'
     - 'converge'
-    # - 'idempotence'  # services toggled
-    # - 'side_effect'
     - 'verify'
-    # - 'cleanup'
     - 'destroy'

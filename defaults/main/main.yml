@@ -1,38 +1,51 @@
 ---
 # yamllint disable rule:line-length
 ###############################################################################
-# NFS 4.2 Role Configuration
+# Feature Flags
 ###############################################################################
-# NFS V2 is not supported in bookworm. Explicitly disable V3 by default.
-#
-# Default configuration supports NFSv4.2.
 
-# Configure NFS server? Default: False.
-nfs_server: false
-
-# Configure NFS client? Default: False.
-nfs_client: false
-
-# Enable legacy services?
+# 1. Enable legacy services?
 #
 # NFS V4+ does not require rpcbind, rpc-statd, rpc-statd-notify services; these
-# are disabled by default. Enable if needed by services other than NFS.
+# are disabled by default. PVE nodes only require rpcbind services for NFS; it
+# is safe to disable if using V4. Enable if needed by services other than NFS.
 #
 # Default: False.
-nfs_legacy_services_enable: false
+nfs_flg_legacy_services: false
+
+# 2. Configure NFS server? Default: False.
+nfs_flg_server: false
+
+# 3. Configure NFS client? Default: False.
+nfs_flg_client: false
+
+# 4. Use systemd automounts for clients instead of /etc/fstab?
+#
+# Creates mount, automount units for each client mounted share; mounted on
+# demand instead of being mounted via fstab. Units are created using the mount
+# path as the name, replacing / with -.
+#
+# Only use fstab mounts if the NFS shares will be available on boot or use
+# 'noauto' and 'nofail' options.
+#
+# Default: True.
+nfs_flg_systemd_automount: true
 
 ###############################################################################
-# NFS Exports (server)
+# Config
+###############################################################################
+
+# Server
 ###############################################################################
 # Traditional NFS Server Exports. Follow formats from exports (man exports).
 #
 # ZFS filesystems should export single hosts directly from ZFS which will
 # automatically use the configured NFS server. Complex multi-host exports
-# should be done through nfs_exports.
+# should be done through nfs_cfg_exports.
 #
 # Export nested directories before the corresponding root directories.
 #
-# nfs_exports:
+# nfs_cfg_exports:
 #     list of dict - NFS exported shares.
 #   - source: str - Source directory to share.
 #     hosts:
@@ -51,7 +64,7 @@ nfs_legacy_services_enable: false
 #                          hosts or hosts with - are ignored.
 #         options: list of str - Exports options.
 #
-# nfs_exports:
+# nfs_cfg_exports:
 #   - source: '/data/pictures'
 #     hosts:
 #       - host: '10.2.2.80'
@@ -77,9 +90,8 @@ nfs_legacy_services_enable: false
 # * https://linux.die.net/man/5/exports
 # * https://unix.stackexchange.com/questions/763248/is-fsid-really-needed-for-nfs-export
 # * https://forums.freebsd.org/threads/zfs-and-nfs-to-multiple-nic-netwokrs.35550/
-nfs_exports: []
+nfs_cfg_exports: []
 
-###############################################################################
 # NFS Mounts (client)
 ###############################################################################
 # Recommend clients use 9000 MTU (jumbo frames), rsize=1048576, wsize=1048576.
@@ -90,25 +102,13 @@ nfs_exports: []
 # * https://cromwell-intl.com/open-source/performance-tuning/nfs.html
 # * https://linux.die.net/man/5/nfs
 
-# Use systemd automounts instead of /etc/fstab?
-#
-# Creates mount, automount units for each mounted share; mounted on demand
-# instead of being mounted via fstab. Units are created using the mount path
-# as the name, replacing / with -.
-#
-# Only use fstab mounts if the NFS shares will be available on boot or use
-# 'noauto' and 'nofail' options.
-#
-# Default: True.
-nfs_systemd_automount_enable: true
-
 # NFS shares to mount.
 #
 # Special Case:
 #   * Client mount points will be automatically created regardless of systemd
 #     or FSTAB use.
 #
-# nfs_mounts:
+# nfs_cfg_mounts:
 #     list of dict - Client NFS mounts.
 #   - server: str - NFS server.
 #     export: str - NFS export path.
@@ -116,7 +116,7 @@ nfs_systemd_automount_enable: true
 #         Values:
 #           present: Create NFS mount, do not trigger immediate mount.
 #           mounted: Create NFS mount, trigger immediate mount (treated as
-#                    present if nfs_systemd_automount_enable).
+#                    present if nfs_flg_systemd_automount).
 #            absent: Unmount and remove NFS mount
 #     mount: str - Client full path mount location.
 #     mode: str - Octal permissions for client mount point.
@@ -126,7 +126,7 @@ nfs_systemd_automount_enable: true
 #     timeout: int - Mount timeout in seconds.
 #         Default: 30.
 #
-# nfs_mounts:
+# nfs_cfg_mounts:
 #   - server: 'example.com'
 #     export: '/data/pictures'
 #     mount: '/data/pictures'
@@ -146,4 +146,4 @@ nfs_systemd_automount_enable: true
 # Reference:
 # * https://wiki.archlinux.org/title/NFS
 # * https://manpages.debian.org/testing/mount/mount.8.en.html
-nfs_mounts: []
+nfs_cfg_mounts: []

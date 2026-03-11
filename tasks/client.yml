@@ -6,7 +6,7 @@
 # Configure NFS automounts via systemd or fstab.
 #
 # Args:
-#   mount: dict - one element from nfs_mounts
+#   mount: dict - one element from nfs_cfg_mounts
 #
 # Reference:
 # * https://wiki.archlinux.org/title/NFS#As_systemd_unit
@@ -14,72 +14,70 @@
 # * https://github.com/zilexa/Homeserver/tree/master/filesystem/networkshares_HowTo-NFSv4.2
 # yamllint enable rule:line-length
 
-- name: 'Client | generate service name'
+- name: 'Client | fact | generate service base name'
   ansible.builtin.set_fact:
-    _nfs_systemd_name: '{{ mount.mount[1:] | replace("/", "-") }}'
+    nfs__systemd_file: '{{
+        nfs___app._systemd_dir ~ "/" ~
+        mount.mount[1:] | replace("/", "-")
+      }}'
 
-- name: 'Client | systemd | enable automount'
-  when: nfs_systemd_automount_enable
-  ansible.builtin.include_role:
-    name: 'r_pufky.deb.systemd'
-  vars:
-    mount_state: '{{ "present" if mount.state != "absent" }}'
-    systemd_mounts:
-      - name: '{{ _nfs_systemd_name }}'
-        state: '{{ mount_state }}'
-        drop_in: false
-        unit:
-          description: 'NFS mount {{ mount.server }}:{{ mount.export }}'
-        mount:
-          what: '{{ mount.server }}:{{ mount.export }}'
-          where: '{{ mount.mount }}'
-          type: 'nfs4'
-          options:
-            '{{ mount.options | default(nfs_role_default_mount_options) }}'
-          directory_mode: '{{ mount.mode | default("0755") }}'
-          timeout_sec: '{{ mount.timeout | default(30) }}'
-        install:
-          wanted_by:
-            - 'multi-user.target'
-    systemd_automounts:
-      - name: '{{ _nfs_systemd_name }}'
-        state: '{{ mount_state }}'
-        drop_in: false
-        unit:
-          description: 'Automount NFS {{ mount.server }}:{{ mount.export }}'
-        automount:
-          where: '{{ mount.mount }}'
-          directory_mode: '{{ mount.mode | default("0755") }}'
-        install:
-          wanted_by:
-            - 'multi-user.target'
+- name: '{{ "Client | filesystem | set " ~ nfs__systemd_file ~ ".mount" }}'
+  when: nfs_flg_systemd_automount and mount.state != 'absent'
+  notify: 'Handlers | systemd'
+  ansible.builtin.template:
+    src: 'systemd/client.mount.j2'
+    dest: '{{ nfs__systemd_file ~ ".mount" }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
 
-- name: 'Client | fstab'
-  when: not nfs_systemd_automount_enable
+- name: '{{ "Client | filesystem | set " ~ nfs__systemd_file ~ ".automount" }}'
+  when: nfs_flg_systemd_automount and mount.state != 'absent'
+  notify: 'Handlers | systemd'
+  ansible.builtin.template:
+    src: 'systemd/client.automount.j2'
+    dest: '{{ nfs__systemd_file ~ ".automount" }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
+- name: '{{ "Client | filesystem | remove " ~ nfs__systemd_file ~ ".*" }}'
+  when: nfs_flg_systemd_automount and mount.state == 'absent'
+  notify: 'Handlers | systemd'
+  ansible.builtin.file:
+    path: '{{ nfs__systemd_file ~ item }}'
+    state: 'absent'
+  loop:
+    - 'mount'
+    - 'automount'
+
+- name: 'Client | filesystem | fstab'
+  when: not nfs_flg_systemd_automount
   block:
-    - name: 'Client | query mount point'
+    - name: '{{ "Client | filesystem | query " ~ mount.mount }}'
       ansible.builtin.stat:
         path: '{{ mount.mount }}'
-      register: _nfs_query_mount
+      register: nfs__query_mount
 
     # Mounted mount point will fail to set permissions even if root.
-    - name: 'Client | create mount point'
-      when: not _nfs_query_mount.stat.exists
+    - name: '{{ "Client | filesystem | create " ~ mount.mount }}'
+      when: not nfs__query_mount.stat.exists
       ansible.builtin.file:
         path: '{{ mount.mount }}'
         mode: '{{ mount.mode | default("0755") }}'
         state: 'directory'
       become: true
 
-    - name: 'Client | create fstab mount'
+    - name: 'Client | filesystem | create fstab mount'
       notify:
-        - 'Handlers | reload systemd'
-        - 'Handlers | mount -a'
+        - 'Handlers | systemd mount'
       ansible.posix.mount:
         src: '{{ mount.server }}:{{ mount.export }}'
         path: '{{ mount.mount }}'
         opts: '{{
-            mount.options | default(nfs_role_default_mount_options) | join(",")
+            mount.options |
+            default(nfs___app._default_mount_options) |
+            join(",")
           }}'
         fstype: 'nfs4'
         state: '{{ mount.state }}'

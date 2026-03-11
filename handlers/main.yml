@@ -3,29 +3,40 @@
 # NFS Handlers
 ###############################################################################
 
-- name: 'Handlers | restart nfs-server'
+- name: 'Handlers | systemd'
+  listen:
+    - 'Handlers | systemd nfs-server'
+    - 'Handlers | systemd nfs-mountd'
+    - 'Handlers | systemd mount'
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: 'Handlers | nfs-server'
+  listen:
+    - 'Handlers | systemd nfs-server'
+    - 'Handlers | nfs-server nfs-mountd'
   ansible.builtin.systemd:
     name: 'nfs-server'
     state: 'restarted'
     enabled: true
     daemon_reload: true
 
-- name: 'Handlers | restart nfs-mountd'
+- name: 'Handlers | nfs-mountd'
+  listen:
+    - 'Handlers | systemd nfs-mountd'
+    - 'Handlers | nfs-server nfs-mountd'
   ansible.builtin.systemd:
     name: 'nfs-mountd'
     state: 'restarted'
     enabled: true
     daemon_reload: true
 
-- name: 'Handlers | refresh exports'
+- name: 'Handlers | exports'
   ansible.builtin.command: '/usr/sbin/exportfs -ra'
   changed_when: false
 
-- name: 'Handlers | reload systemd'
-  ansible.builtin.systemd:
-    daemon_reload: true
-
-# Mount all NFS shares at once.
-- name: 'Handlers | mount -a'  # noqa command-instead-of-module
-  ansible.builtin.command: '/usr/bin/mount -a'
+- name: 'Handlers | mount'  # noqa command-instead-of-module immediate.
+  listen:
+    - 'Handlers | systemd mount'
+  ansible.builtin.command: '/usr/bin/mount -a'  # Mount all shares at once.
   changed_when: true

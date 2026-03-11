@@ -28,44 +28,53 @@
 # * https://orca.pet/nfs4debian/
 # * https://forum.proxmox.com/threads/nfsv4-server-disabled-under-pve-8.129803/
 
-- name: 'Server | disable NFSv2, NFSv3'
-  ansible.builtin.include_role:
-    name: 'r_pufky.deb.systemd'
-  vars:
-    systemd_services:
-      # V2 not supported in bookworm; --no-nfs-version 2 will explicitly fail.
-      - name: 'nfs-server'
-        state: 'present'
-        drop_in: true
-        service:
-          exec_start:
-            - ''
-            - '/usr/sbin/rpc.nfsd --no-nfs-version 3'
-      - name: 'nfs-mountd'
-        state: 'present'
-        drop_in: true
-        service:
-          exec_start:
-            - ''
-            - '/usr/sbin/rpc.mountd --no-nfs-version 2 --no-nfs-version 3'
+- name: '{{ "Server | filesystem | create override directories" }}'
+  ansible.builtin.file:
+    path: '{{ item }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+    state: 'directory'
+  loop:
+    - '{{ nfs___app._server_drop_in | dirname }}'
+    - '{{ nfs___app._mountd_drop_in | dirname }}'
 
-- name: 'Server | set /etc/nfs.conf.d/local.conf'
+- name: '{{ "Server | filesystem | create " ~ nfs___app._server_drop_in }}'
   notify:
-    - 'Handlers | restart nfs-server'
-    - 'Handlers | restart nfs-mountd'
+    - 'Handlers | systemd nfs-server'
   ansible.builtin.template:
-    src: 'local.conf.j2'
-    dest: '/etc/nfs.conf.d/local.conf'
+    src: 'systemd/nfs-server.override.j2'
+    dest: '{{ nfs___app._server_drop_in }}'
     owner: 'root'
     group: 'root'
     mode: '0644'
 
-- name: 'Server | set /etc/exports'
+- name: '{{ "Server | filesystem | create " ~ nfs___app._mountd_drop_in }}'
   notify:
-    - 'Handlers | refresh exports'
+    - 'Handlers | systemd nfs-mountd'
+  ansible.builtin.template:
+    src: 'systemd/nfs-mountd.override.j2'
+    dest: '{{ nfs___app._mountd_drop_in }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
+- name: '{{ "Server | filesystem | set " ~ nfs___app._local }}'
+  notify:
+    - 'Handlers | nfs-server nfs-mountd'
+  ansible.builtin.template:
+    src: 'local.conf.j2'
+    dest: '{{ nfs___app._local }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
+- name: '{{ "Server | filesystem | set " ~ nfs___app._exports }}'
+  notify:
+    - 'Handlers | exports'
   ansible.builtin.template:
     src: 'exports.j2'
-    dest: '/etc/exports'
+    dest: '{{ nfs___app._exports }}'
     owner: 'root'
     group: 'root'
     mode: '0644'

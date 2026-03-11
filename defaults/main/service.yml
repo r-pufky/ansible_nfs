@@ -1,18 +1,21 @@
 ---
 # yamllint disable rule:line-length
 ###############################################################################
-# NFS General Configuration (/etc/nfs.conf.d/local.conf)
+# Service
 ###############################################################################
-# NFS general configuration settings. For most users, there will be no need to
-# modify these options. NFSv2, NFSv3 specific options will have **no effect**
-# as those versions are hard disabled.
+# NFS general configuration settings (/etc/nfs.conf.d/local.conf). For most
+# users, there will be no need to modify these options. NFSv2, NFSv3 specific
+# options will have **no effect** as those versions are hard disabled.
 #
 # Reference:
 # * https://www.man7.org/linux/man-pages/man5/nfs.conf.5.html
 
-nfs_conf_general_pipefs_directory: '/run/rpc_pipefs'
-
+# General
 ###############################################################################
+
+# Location of rpc_pipefs (pipefs-directory). Default: '/run/rpc_pipefs'.
+nfs_srv_general_pipefs_directory: '/run/rpc_pipefs'
+
 # nfsrahead (NFS readahead for mounts)
 ###############################################################################
 # Read ahead is recommended to be 15 * rsize.
@@ -21,14 +24,16 @@ nfs_conf_general_pipefs_directory: '/run/rpc_pipefs'
 # * https://www.man7.org/linux/man-pages/man5/nfsrahead.5.html
 
 # NFS mount readahead for NFSv3 (KB). Default: 15000.
-nfs_conf_nfsrahead_nfs: 15000
+nfs_srv_nfsrahead_nfs: 15000
 
 # NFS mount readahead for NFSv4 (KB). Default: 16000.
-nfs_conf_nfsrahead_nfsv4: 16000
+nfs_srv_nfsrahead_nfsv4: 16000
 
 # NFS mount readahead default (KB). Default: 128.
-nfs_conf_nfsrahead_default: 128
+nfs_srv_nfsrahead_default: 128
 
+# Exports
+###############################################################################
 # Prefix path to all exported entries.
 #
 # NFSv4 requires a single root file handle to enable benefits of local file
@@ -39,9 +44,9 @@ nfs_conf_nfsrahead_default: 128
 # If required, create the export directory outside of this role and link any
 # exported directories in it. Exported filesystems will appear to clients as
 # from root ({SEVER}:/{EXPORT}); on the server it will map to
-# nfs_conf_exports_rootdir/{EXPORT}.
+# nfs_srv_exports_rootdir/{EXPORT}.
 #
-# nfs_conf_exports_rootdir: '/export'
+# nfs_srv_exports_rootdir: '/export'
 #
 # server /etc/exports:
 #   /data *(rw,anonuid=1000,anongid=1000)
@@ -56,7 +61,7 @@ nfs_conf_nfsrahead_default: 128
 #
 # Reference:
 # * https://serverfault.com/questions/1143373/nfsv4-fsid-option-and-the-purpose-of-export-roots
-nfs_conf_exports_rootdir: ''
+nfs_srv_exports_rootdir: ''
 
 # Enable exportfs debugging?
 #
@@ -64,28 +69,27 @@ nfs_conf_exports_rootdir: ''
 #     Reference: https://patchwork.kernel.org/project/linux-nfs/patch/20221004174015.1362841-1-sorenson@redhat.com/
 #
 # Default: False.
-nfs_conf_exportfs_debug: false
+nfs_srv_exportfs_debug: false
 
-###############################################################################
 # gssd
 ###############################################################################
 # Reference:
 # * https://www.man7.org/linux/man-pages/man8/rpc.gssd.8.html
 
 # Verbosity, equivalent to number of -v. Default: 0.
-nfs_conf_gssd_verbosity: 0
+nfs_srv_gssd_verbosity: 0
 
 # RPC verbosity, equivalent to number of -v. Default: 0.
-nfs_conf_gssd_rpc_verbosity: 0
+nfs_srv_gssd_rpc_verbosity: 0
 
 # Use memcache? Default: False.
-nfs_conf_gssd_use_memcache: false
+nfs_srv_gssd_use_memcache: false
 
 # Use local system machine credentials? Default: True.
-nfs_conf_gssd_use_machine_creds: true
+nfs_srv_gssd_use_machine_creds: true
 
 # Enable GSSAPI proxy requests? Default: False.
-nfs_conf_gssd_use_gss_proxy: false
+nfs_srv_gssd_use_gss_proxy: false
 
 # Avoid reverse DNS lookups?
 #
@@ -97,10 +101,10 @@ nfs_conf_gssd_use_gss_proxy: false
 # vulnerability.
 #
 # Default: True.
-nfs_conf_gssd_avoid_dns: true
+nfs_srv_gssd_avoid_dns: true
 
 # Restrict sessions to weak encryption types? Default: False.
-nfs_conf_gssd_limit_to_legacy_enctypes: false
+nfs_srv_gssd_limit_to_legacy_enctypes: false
 
 # Kernel GSS context timeout (seconds).
 #
@@ -110,7 +114,7 @@ nfs_conf_gssd_limit_to_legacy_enctypes: false
 # the Kerberos service ticket used in its creation.
 #
 # Default: 0 (no timeout).
-nfs_conf_gssd_context_timeout: 0
+nfs_srv_gssd_context_timeout: 0
 
 # RPC connection timeout (seconds).
 #
@@ -119,10 +123,10 @@ nfs_conf_gssd_context_timeout: 0
 # timed out", you should consider an increase of this timeout.
 #
 # Default: 5.
-nfs_conf_gssd_rpc_timeout: 5
+nfs_srv_gssd_rpc_timeout: 5
 
 # Use keytab file to obtain machine credentials. Default: '/etc/krb5.keytab'.
-nfs_conf_gssd_keytab_file: '/etc/krb5.keytab'
+nfs_srv_gssd_keytab_file: '/etc/krb5.keytab'
 
 # List of search directories for credential files.
 #
@@ -130,10 +134,10 @@ nfs_conf_gssd_keytab_file: '/etc/krb5.keytab'
 #   %U: UID of the user for whom credentials are being searched.
 #
 # Default: [].
-nfs_conf_gssd_cred_cache_directory: []
+nfs_srv_gssd_cred_cache_directory: []
 
 # Kerberos realm preferred when scanning available credentials. Default: ''.
-nfs_conf_gssd_preferred_realm: ''
+nfs_srv_gssd_preferred_realm: ''
 
 # Use $HOME instead of / for k5identity files?
 #
@@ -142,7 +146,7 @@ nfs_conf_gssd_preferred_realm: ''
 # /var/kerberos/krb5/user/$EUID/client.keytab.
 #
 # Default: True.
-nfs_conf_gssd_set_home: true
+nfs_srv_gssd_set_home: true
 
 # Upcall thread timeout (seconds).
 #
@@ -151,24 +155,22 @@ nfs_conf_gssd_set_home: true
 #   600: Maximum timeout.
 #
 # Default: 30.
-nfs_conf_gssd_upcall_timeout: 30
+nfs_srv_gssd_upcall_timeout: 30
 
 # Report -ETIMEDOUT to kernel for upcall thread timeouts? Default: False.
-nfs_conf_gssd_cancel_timed_out_upcalls: false
+nfs_srv_gssd_cancel_timed_out_upcalls: false
 
-###############################################################################
 # lockd
 ###############################################################################
 # Reference:
 # * https://www.man7.org/linux/man-pages/man8/rpc.statd.8.html
 
 # lockd NLM request port. Default: 0 (disabled).
-nfs_conf_lockd_port: 0
+nfs_srv_lockd_port: 0
 
 # lockd NLM UDP request port. Default: 0 (disabled).
-nfs_conf_lockd_udp_port: 0
+nfs_srv_lockd_udp_port: 0
 
-###############################################################################
 # exportd
 ###############################################################################
 # Reference:
@@ -184,7 +186,7 @@ nfs_conf_lockd_udp_port: 0
 #     parse: File parsing messages.
 #
 # Default: '' (disabled).
-nfs_conf_exportd_debug: ''
+nfs_srv_exportd_debug: ''
 
 # Map UIDs to GIDs?
 #
@@ -198,10 +200,10 @@ nfs_conf_exportd_debug: ''
 # command on the client will still be effective.
 #
 # Default: True.
-nfs_conf_exportd_manage_gids: true
+nfs_srv_exportd_manage_gids: true
 
 # NFS exportd state directory. Default: '/var/lib/nfs'.
-nfs_conf_exportd_state_directory_path: '/var/lib/nfs'
+nfs_srv_exportd_state_directory_path: '/var/lib/nfs'
 
 # NFS worker threads nfsv4.exports can spawn.
 #
@@ -210,7 +212,7 @@ nfs_conf_exportd_state_directory_path: '/var/lib/nfs'
 # server is slow or unreliable.
 #
 # Default: 1.
-nfs_conf_exportd_threads: 1
+nfs_srv_exportd_threads: 1
 
 # Use only IP for caching?
 #
@@ -225,7 +227,7 @@ nfs_conf_exportd_threads: 1
 # to read.
 #
 # Default: False.
-nfs_conf_exportd_cache_use_ipaddr: false
+nfs_srv_exportd_cache_use_ipaddr: false
 
 # Kernel cache TTL.
 #
@@ -233,9 +235,8 @@ nfs_conf_exportd_cache_use_ipaddr: false
 # mappings can take longer to be noticed.
 #
 # Default: 1800 (30 minutes).
-nfs_conf_exportd_ttl: 1800
+nfs_srv_exportd_ttl: 1800
 
-###############################################################################
 # mountd
 ###############################################################################
 # Reference:
@@ -251,7 +252,7 @@ nfs_conf_exportd_ttl: 1800
 #     parse: File parsing messages.
 #
 # Default: '' (disabled).
-nfs_conf_mountd_debug: ''
+nfs_srv_mountd_debug: ''
 
 # Map UIDs to GIDs?
 #
@@ -265,10 +266,10 @@ nfs_conf_mountd_debug: ''
 # command on the client will still be effective.
 #
 # Default: True.
-nfs_conf_mountd_manage_gids: true
+nfs_srv_mountd_manage_gids: true
 
 # Open file descriptors limt. Default: 0 (no limit).
-nfs_conf_mountd_descriptors: 0
+nfs_srv_mountd_descriptors: 0
 
 # Mountd RPC listener port.
 #
@@ -278,7 +279,7 @@ nfs_conf_mountd_descriptors: 0
 # and servers.
 #
 # Default: 0 (/etc/services).
-nfs_conf_mountd_port: 0
+nfs_srv_mountd_port: 0
 
 # NFS worker threads nfsv4.mountd can spawn.
 #
@@ -287,7 +288,7 @@ nfs_conf_mountd_port: 0
 # server is slow or unreliable.
 #
 # Default: 1.
-nfs_conf_mountd_threads: 1
+nfs_srv_mountd_threads: 1
 
 # Perform reverse lookup for each IP address?
 #
@@ -299,17 +300,17 @@ nfs_conf_mountd_threads: 1
 # situations.
 #
 # Default: False.
-nfs_conf_mountd_reverse_lookup: false
+nfs_srv_mountd_reverse_lookup: false
 
 # NFS mountd state directory (etab, rmtab). Default: '/var/lib/nfs'.
-nfs_conf_mountd_state_directory_path: '/var/lib/nfs'
+nfs_srv_mountd_state_directory_path: '/var/lib/nfs'
 
 # High availability callout program.
 #
 # Not needed with 2.6+ kernels. Mount nfsd on /proc/fs/nfsd instead.
 #
 # Default: '' (disabled).
-nfs_conf_mountd_ha_callout: ''
+nfs_srv_mountd_ha_callout: ''
 
 # Use only IP for caching?
 #
@@ -324,7 +325,7 @@ nfs_conf_mountd_ha_callout: ''
 # to read.
 #
 # Default: False.
-nfs_conf_mountd_cache_use_ipaddr: false
+nfs_srv_mountd_cache_use_ipaddr: false
 
 # Kernel cache TTL.
 #
@@ -332,27 +333,25 @@ nfs_conf_mountd_cache_use_ipaddr: false
 # mappings can take longer to be noticed.
 #
 # Default: 1800 (30 minutes).
-nfs_conf_mountd_ttl: 1800
+nfs_srv_mountd_ttl: 1800
 
-###############################################################################
 # nfscl (nfscld, nfscltrack)
 ###############################################################################
 # Reference:
 # * https://www.man7.org/linux/man-pages/man8/nfsdcltrack.8.html
 
 # Enable client tracking daemon debugging? Default: False.
-nfs_conf_nfsdcld_debug: false
+nfs_srv_nfsdcld_debug: false
 
 # Client tracking daemon stable storage. Default: '/var/lib/nfs/nfsdcld'
-nfs_conf_nfsdcld_storagedir: '/var/lib/nfs/nfsdcld'
+nfs_srv_nfsdcld_storagedir: '/var/lib/nfs/nfsdcld'
 
 # Enable client tracking debugging? Default: False.
-nfs_conf_nfsdcltrack_debug: false
+nfs_srv_nfsdcltrack_debug: false
 
 # Client tracking stable storage. Default: '/var/lib/nfs/nfsdcltrack'
-nfs_conf_nfsdcltrack_storagedir: '/var/lib/nfs/nfsdcltrack'
+nfs_srv_nfsdcltrack_storagedir: '/var/lib/nfs/nfsdcltrack'
 
-###############################################################################
 # nfsd
 ###############################################################################
 # Reference:
@@ -364,7 +363,7 @@ nfs_conf_nfsdcltrack_storagedir: '/var/lib/nfs/nfsdcltrack'
 #     Reference: https://patchwork.kernel.org/project/linux-nfs/patch/20221004174015.1362841-1-sorenson@redhat.com/
 #
 # Default: False.
-nfs_conf_nfsd_debug: false
+nfs_srv_nfsd_debug: false
 
 # Number of threads to start.
 #
@@ -374,7 +373,7 @@ nfs_conf_nfsd_debug: false
 #
 # Reference:
 # * https://www.admin-magazine.com/HPC/Articles/Useful-NFS-Options-for-Tuning-and-Management
-nfs_conf_nfsd_threads: 8
+nfs_srv_nfsd_threads: 8
 
 # Accept NFS requests on specified interfaces.
 #
@@ -383,10 +382,10 @@ nfs_conf_nfsd_threads: 8
 #   {HOST}: Hostname.
 #
 # Default: [] (all).
-nfs_conf_nfsd_host: []
+nfs_srv_nfsd_host: []
 
 # NFSD TCP/UDP port. Default: 2049.
-nfs_conf_nfsd_port: 2049
+nfs_srv_nfsd_port: 2049
 
 # Grace time used for NFSv4 and NLM (seconds).
 #
@@ -394,7 +393,7 @@ nfs_conf_nfsd_port: 2049
 # until after this time has passed to allow clients to recover state.
 #
 # Default: 90.
-nfs_conf_nfsd_grace_time: 90
+nfs_srv_nfsd_grace_time: 90
 
 # NFSv4 lease (seconds).
 #
@@ -406,51 +405,50 @@ nfs_conf_nfsd_grace_time: 90
 #   3600: Maximum lease.
 #
 # Default: 90.
-nfs_conf_nfsd_lease_time: 90
+nfs_srv_nfsd_lease_time: 90
 
 # Enable UDP? Default: False.
-nfs_conf_nfsd_udp: false
+nfs_srv_nfsd_udp: false
 
 # Enable TCP? Default: True.
-nfs_conf_nfsd_tcp: true
+nfs_srv_nfsd_tcp: true
 
 # Enable NFSv3 versions?
 #
 # Individual versions must still be enabled.
 #
 # Default: False.
-nfs_conf_nfsd_vers3: false
+nfs_srv_nfsd_vers3: false
 
 # Enable NFSv4 versions?
 #
 # Individual versions must still be enabled.
 #
 # Default: True.
-nfs_conf_nfsd_vers4: true
+nfs_srv_nfsd_vers4: true
 
-# Enable NFSv4.0 (requires nfs_conf_nfsd_vers4)? Default: False.
-nfs_conf_nfsd_vers40: false
+# Enable NFSv4.0 (requires nfs_srv_nfsd_vers4)? Default: False.
+nfs_srv_nfsd_vers40: false
 
-# Enable NFSv4.1 (requires nfs_conf_nfsd_vers4)? Default: False.
-nfs_conf_nfsd_vers41: false
+# Enable NFSv4.1 (requires nfs_srv_nfsd_vers4)? Default: False.
+nfs_srv_nfsd_vers41: false
 
-# Enable NFSv4.2 (requires nfs_conf_nfsd_vers4)? Default: True.
-nfs_conf_nfsd_vers42: true
+# Enable NFSv4.2 (requires nfs_srv_nfsd_vers4)? Default: True.
+nfs_srv_nfsd_vers42: true
 
 # Enable RDMA? Default: False.
-nfs_conf_nfsd_rdma: false
+nfs_srv_nfsd_rdma: false
 
 # RDMA port. Default: 20049.
-nfs_conf_nfsd_rdma_port: 20049
+nfs_srv_nfsd_rdma_port: 20049
 
-###############################################################################
 # statd
 ###############################################################################
 # Reference:
 # * https://www.man7.org/linux/man-pages/man8/rpc.statd.8.html
 
 # Enable statd debugging? Default: False.
-nfs_conf_statd_debug: false
+nfs_srv_statd_debug: false
 
 # Statd RPC litener port.
 #
@@ -460,12 +458,12 @@ nfs_conf_statd_debug: false
 # and servers.
 #
 # Default: 0 (/etc/services).
-nfs_conf_statd_port: 0
+nfs_srv_statd_port: 0
 
 # Source port for sm-notify when sending reboot notifications.
 #
 # Default: 0 (random ephermeral port).
-nfs_conf_statd_outgoing_port: 0
+nfs_srv_statd_outgoing_port: 0
 
 # Source interface to send reboot notifications.
 #
@@ -475,36 +473,35 @@ nfs_conf_statd_outgoing_port: 0
 #       '': Wildcard address (*) (default).
 #
 # Default: '' (wildcard address).
-nfs_conf_statd_name: ''
+nfs_srv_statd_name: ''
 
 # NFS mountd state directory (NSM). Default: '/var/lib/nfs/statd'.
-nfs_conf_statd_state_directory_path: '/var/lib/nfs/statd'
+nfs_srv_statd_state_directory_path: '/var/lib/nfs/statd'
 
 # High availability callout program.
 #
 # Not needed with 2.6+ kernels. Mount nfsd on /proc/fs/nfsd instead.
 #
 # Default: '' (disabled).
-nfs_conf_statd_ha_callout: ''
+nfs_srv_statd_ha_callout: ''
 
 # Prevent running sm-notify on start up?
 #
 # Preserves existing NSM state number and monitor list.
 #
 # Default: False.
-nfs_conf_statd_no_notify: false
+nfs_srv_statd_no_notify: false
 
-###############################################################################
 # sm-notify
 ###############################################################################
 # Reference:
 # * https://www.man7.org/linux/man-pages/man8/sm-notify.8.html
 
 # Enable sm-notify debugging? Default: False.
-nfs_conf_sm_notify_debug: false
+nfs_srv_sm_notify_debug: false
 
 # Force notifications even if run since last reboot? Default: False.
-nfs_conf_sm_notify_force: false
+nfs_srv_sm_notify_force: false
 
 # Retry notifications until timeout (seconds).
 #
@@ -512,12 +509,12 @@ nfs_conf_sm_notify_force: false
 #   0: Indefinitely until killed.
 #
 # Default: 900 (15 minutes).
-nfs_conf_sm_notify_retry_time: 900
+nfs_srv_sm_notify_retry_time: 900
 
 # Source port for sm-notify when sending reboot notifications.
 #
 # Default: 0 (random ephermeral port).
-nfs_conf_sm_notify_outgoing_port: 0
+nfs_srv_sm_notify_outgoing_port: 0
 
 # Source interface to send reboot notifications.
 #
@@ -527,12 +524,11 @@ nfs_conf_sm_notify_outgoing_port: 0
 #       '': Wildcard address (*) (default).
 #
 # Default: '' (wildcard address).
-nfs_conf_sm_notify_outgoing_addr: ''
+nfs_srv_sm_notify_outgoing_addr: ''
 
 # Lift lockd grace period early if no hosts to notify? Default: True.
-nfs_conf_sm_notify_lift_grace: true
+nfs_srv_sm_notify_lift_grace: true
 
-###############################################################################
 # svcgssd
 ###############################################################################
 # Reference:
@@ -545,4 +541,4 @@ nfs_conf_sm_notify_lift_grace: true
 #       '': USE default (nfs/FQDN@REALM) (default).
 #
 # Default: '' (nfs/FQDN@REALM).
-nfs_conf_svcgssd_principal: ''
+nfs_srv_svcgssd_principal: ''

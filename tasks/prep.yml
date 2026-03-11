@@ -1,7 +1,9 @@
 ---
 ###############################################################################
-# Disable NFS V2, V3
+# Prep
 ###############################################################################
+# Parse _cfg_ defaults to generate runtime data and store in data annotations.
+#
 # Hard disable NFSv2, NFSv3.
 #
 # Bookworm does not support V2; V3 should not be used in lieu of V4, which
@@ -21,14 +23,33 @@
 # * https://wiki.debian.org/NFSServerSetup
 # * https://forum.proxmox.com/threads/nfsv4-server-disabled-under-pve-8.129803/
 
-- name: 'Disable NFSv2, NFSv3 | disable legacy services'
-  when: not nfs_legacy_services_enable
-  ansible.builtin.systemd_service:
+- name: 'Prep | fact | record start time'
+  ansible.builtin.set_fact:
+    nfs__cfg: "{{ {} | r_pufky.data.v3(
+
+        _start=now(utc=True, fmt='%Y-%m-%dT%H%M%S'),
+        _exports=nfs_cfg_exports,
+        _mounts=nfs_cfg_mounts,
+      ) }}"
+
+- name: 'Prep | systemd | disable NFSv2, NFSv3 legacy services'
+  when: not nfs_flg_legacy_services
+  ansible.builtin.systemd:
     name: '{{ item }}'
     masked: true
     state: 'stopped'
+  failed_when: false
   loop:
     - 'rpcbind'
     - 'rpcbind.socket'
     - 'rpc-statd'
     - 'rpc-statd-notify'
+
+- name: 'Prep | packages'
+  ansible.builtin.include_role:
+    name: 'r_pufky.deb.apt'
+  vars:
+    apt_packages:
+      - '{{ nfs___server_packages if nfs_flg_server else [] }}'
+      - '{{ nfs___client_packages if nfs_flg_client else [] }}'
+    apt_srv_package_update_cache: true
