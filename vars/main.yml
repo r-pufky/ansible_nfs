@@ -13,7 +13,7 @@ nfs___app: "{{ {} | r_pufky.data.v3(
 
     _exports='/etc/exports',
     _local='/etc/nfs.conf.d/local.conf',
-    _systemd_dir='/etc/systemd/system',
+    _systemd_d='/etc/systemd/system',
     _server_drop_in='/etc/systemd/system/nfs-server.service.d/override.conf',
     _mountd_drop_in='/etc/systemd/system/nfs-mountd.service.d/override.conf',
     _default_mount_options=['nfsvers=4', 'minorversion=2', 'proto=tcp', 'fsc'],

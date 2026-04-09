@@ -17,7 +17,7 @@
 - name: 'Client | fact | generate service base name'
   ansible.builtin.set_fact:
     nfs__systemd_file: '{{
-        nfs___app._systemd_dir ~ "/" ~
+        nfs___app._systemd_d ~ "/" ~
         mount.mount[1:] | replace("/", "-")
       }}'
 
