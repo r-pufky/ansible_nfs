@@ -27,6 +27,7 @@ provisioner:
   inventory:
     group_vars:
       all:
+        apt_srv_auto_grub_boot: true  # Testing VM only.
         nfs_flg_server: true
         nfs_flg_client: true
         nfs_cfg_exports:
